@@ -1,9 +1,29 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, 'data');
+const SEED_DIR = path.join(__dirname, 'data');
+const DATA_DIR = process.env.VERCEL ? path.join('/tmp', 'smspulse_data') : SEED_DIR;
+
 if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+  try {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  } catch (e) {}
+}
+
+// On Vercel serverless environment, copy seed data files into writable /tmp
+if (process.env.VERCEL && fs.existsSync(SEED_DIR)) {
+  try {
+    const files = fs.readdirSync(SEED_DIR);
+    for (const f of files) {
+      const src = path.join(SEED_DIR, f);
+      const dest = path.join(DATA_DIR, f);
+      if (!fs.existsSync(dest) && fs.statSync(src).isFile()) {
+        try {
+          fs.copyFileSync(src, dest);
+        } catch (err) {}
+      }
+    }
+  } catch (e) {}
 }
 
 function getFilePath(collection) {
