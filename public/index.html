@@ -420,29 +420,8 @@
         <p style="font-size:0.85rem; color:var(--text-muted);">to continue to <strong style="color:var(--primary);">SMSPulse</strong></p>
       </div>
 
-      <div class="google-accounts-list" id="google-accounts-list">
-        <!-- Main User Account (from active browser profile) -->
-        <div class="google-account-item" onclick="selectGoogleAccount('rizwansaeed2980@gmail.com', 'Rizwan Saeed', 'https://api.dicebear.com/7.x/initials/svg?seed=Rizwan+Saeed')">
-          <div class="google-acc-avatar">
-            <span style="font-weight:700; color:#ffffff;">R</span>
-          </div>
-          <div class="google-acc-info">
-            <div class="google-acc-name">Rizwan Saeed</div>
-            <div class="google-acc-email">rizwansaeed2980@gmail.com</div>
-          </div>
-          <span style="font-size:0.75rem; background:#dbeafe; color:#1d4ed8; padding:2px 8px; border-radius:12px; font-weight:700;">Signed in</span>
-        </div>
-
-        <!-- Custom / Switch Account Item -->
-        <div class="google-account-item add-account" onclick="promptCustomGoogleAccount()">
-          <div class="google-acc-avatar add-icon">
-            <span>+</span>
-          </div>
-          <div class="google-acc-info">
-            <div class="google-acc-name" style="color:var(--primary); font-weight:700;">Use another Google account</div>
-            <div class="google-acc-email">Sign in with a different Gmail address</div>
-          </div>
-        </div>
+      <div id="google-dynamic-container">
+        <!-- Populated dynamically based on this browser's session -->
       </div>
 
       <p style="font-size:0.75rem; text-align:center; color:var(--text-muted); margin-top:1.5rem; line-height:1.4;">
