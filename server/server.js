@@ -51,7 +51,10 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled rejection caught:', reason);
 });
 
-app.listen(PORT, () => {
+module.exports = app;
+
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
   console.log(`=========================================`);
   console.log(`🚀 SMSPulse Server is Running!`);
   console.log(`🌐 Local URL: http://localhost:${PORT}`);
@@ -59,3 +62,5 @@ app.listen(PORT, () => {
   console.log(`⚙️ Admin Dashboard: http://localhost:${PORT}/admin`);
   console.log(`=========================================`);
 });
+
+}
