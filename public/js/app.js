@@ -140,23 +140,25 @@ function getHeaders() {
 
 // Fetch user profile or default demo
 async function initUser() {
-  const savedUserId = localStorage.getItem('smspulse_userId') || localStorage.getItem('smspulse_userId');
+  const savedUserId = localStorage.getItem('smspulse_userId');
   if (savedUserId) {
     try {
       const res = await fetch('/api/auth/me', {
         headers: { 'x-user-id': savedUserId }
       });
       const data = await res.json();
-      if (data.success) {
+      if (data && data.success && data.user) {
         state.user = data.user;
+      } else {
+        localStorage.removeItem('smspulse_userId');
+        state.user = null;
       }
     } catch (e) {
       console.error('Error fetching user:', e);
     }
+  } else {
+    state.user = null;
   }
-
-  // If no saved user, remain guest until user clicks Sign in / Register / Google
-
   renderHeaderUser();
 }
 
@@ -853,10 +855,15 @@ function startPolling() {
 
 // Auth Modals
 function openLoginModal() {
-  if (state.user || localStorage.getItem('smspulse_userId')) { openProfileModal(); return; }
+  if (state.user) { openProfileModal(); return; }
+  closeRegisterModal();
+  closeGoogleChooserModal();
+  closeForgotPasswordModal();
   const modal = document.getElementById('login-modal');
   if (modal) {
     modal.classList.add('open');
+    const input = document.getElementById('login-email');
+    if (input) setTimeout(() => input.focus(), 150);
   } else {
     window.location.href = '/?action=login';
   }
@@ -868,10 +875,15 @@ function closeLoginModal() {
 }
 
 function openRegisterModal() {
-  if (state.user || localStorage.getItem('smspulse_userId')) { openProfileModal(); return; }
+  if (state.user) { openProfileModal(); return; }
+  closeLoginModal();
+  closeGoogleChooserModal();
+  closeForgotPasswordModal();
   const modal = document.getElementById('register-modal');
   if (modal) {
     modal.classList.add('open');
+    const input = document.getElementById('reg-name');
+    if (input) setTimeout(() => input.focus(), 150);
   } else {
     window.location.href = '/?action=register';
   }
@@ -1054,15 +1066,13 @@ document.addEventListener('DOMContentLoaded', () => {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action');
-    const hasUser = Boolean(state.user || localStorage.getItem('smspulse_userId'));
-    if (hasUser) {
-      if (action) {
-        window.history.replaceState({}, document.title, window.location.pathname);
+    if (action) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+      if (!state.user) {
+        if (action === 'login') setTimeout(openLoginModal, 200);
+        else if (action === 'register') setTimeout(openRegisterModal, 200);
+        else if (action === 'google') setTimeout(handleGoogleSignIn, 200);
       }
-    } else {
-      if (action === 'login') setTimeout(openLoginModal, 200);
-      else if (action === 'register') setTimeout(openRegisterModal, 200);
-      else if (action === 'google') setTimeout(handleGoogleSignIn, 200);
     }
   } catch (e) {}
 });
@@ -1122,9 +1132,10 @@ function checkPasswordStrength(pw) {
 
 // Google Sign-In Modal Controls
 function handleGoogleSignIn(source = 'login') {
-  if (state.user || localStorage.getItem('smspulse_userId')) { openProfileModal(); return; }
+  if (state.user) { openProfileModal(); return; }
   closeLoginModal();
   closeRegisterModal();
+  closeForgotPasswordModal();
   const modal = document.getElementById('google-chooser-modal');
   if (modal) {
     modal.classList.add('open');
@@ -1892,3 +1903,11 @@ async function executeSmartBuy(serviceId, startingPrice, btnElem) {
     btnElem.innerHTML = originalText;
   }
 }
+
+
+// modal-backdrop click listener to close on outside click
+document.addEventListener('click', (e) => {
+  if (e.target && e.target.classList && e.target.classList.contains('modal-backdrop')) {
+    e.target.classList.remove('open');
+  }
+});
