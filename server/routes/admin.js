@@ -99,6 +99,20 @@ router.get('/settings', (req, res) => {
 });
 
 // Update Settings
+// Send Test Verification Email
+router.post('/test-email', checkAdmin, async (req, res) => {
+  const { sendVerificationEmail } = require('../services/mailer');
+  const targetEmail = req.body.email || 'rizwansaeed2980@gmail.com';
+  const testPin = Math.floor(100000 + Math.random() * 900000).toString();
+  const result = await sendVerificationEmail(targetEmail, testPin, 'Test Verification');
+
+  if (result.success) {
+    res.json({ success: true, message: `Test email sent successfully to ${targetEmail}! Message ID: ${result.messageId}`, pin: testPin });
+  } else {
+    res.status(400).json({ error: result.error || result.reason || 'Failed to send test email. Please check your Gmail user and 16-digit App Password.' });
+  }
+});
+
 router.post('/settings', checkAdmin, (req, res) => {
   const current = readData('settings');
   const updated = { ...current, ...req.body };

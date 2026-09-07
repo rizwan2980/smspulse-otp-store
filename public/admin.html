@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard — SMSPulse Console</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230284c7%22/><path d=%22M25 50h12l8-18 10 36 8-18h12%22 fill=%22none%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
-  <link rel="stylesheet" href="/css/style.css?v=3.3">
+  <link rel="stylesheet" href="/css/style.css?v=3.4">
 </head>
 <body>
 
@@ -171,6 +171,32 @@
               <span id="api-status-badge" style="color:var(--brand-emerald); font-size:0.75rem; font-weight:700; background:rgba(16,185,129,0.12); padding:2px 8px; border-radius:12px;">✅ Connected & Active</span>
             </div>
             <input type="password" id="set-api-token" class="form-input" style="margin-top:6px;" placeholder="Wholesale SMS Provider API Key">
+          <!-- SMTP Email OTP Delivery Settings -->
+          <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <h4 style="font-size: 0.98rem; font-weight: 800; color: var(--text-main); margin:0;">📧 Real Email OTP Delivery (Gmail SMTP)</h4>
+              <button type="button" class="btn btn-sm btn-outline" onclick="testEmailDelivery(this)" style="font-size:0.75rem; border-radius:12px;">
+                📨 Send Test Email
+              </button>
+            </div>
+            <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 12px; line-height:1.4;">
+              Deliver official 6-digit verification codes directly into customer Gmail inboxes.
+            </p>
+
+            <div class="form-group" style="margin-bottom:10px;">
+              <label class="form-label" style="font-size:0.82rem;">Sender Gmail Address</label>
+              <input type="email" id="set-smtp-user" class="form-input" placeholder="e.g. rizwansaeed2980@gmail.com">
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px;">
+              <label class="form-label" style="font-size:0.82rem;">Google 16-Digit App Password</label>
+              <input type="password" id="set-smtp-pass" class="form-input" placeholder="e.g. abcd efgh ijkl mnop">
+              <span style="font-size:0.72rem; color:var(--text-muted); display:block; margin-top:4px;">
+                Generate 100% free Google App Password: <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color:var(--primary); font-weight:700;">myaccount.google.com/apppasswords</a>
+              </span>
+            </div>
+          </div>
+
             <span style="font-size:0.75rem; color:var(--text-muted);">Aapka provider API token backend mein active hai. Agar future mein change karna ho to yahan naya token daalein.</span>
           </div>
 
@@ -184,7 +210,7 @@
 
   </div>
 
-  <script src="/js/app.js?v=3.3"></script>
+  <script src="/js/app.js?v=3.4"></script>
   <script>
     async function checkAdminAccess() {
       if (!state.user) {
@@ -403,6 +429,31 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadAdminData();
     });
+  
+    async function testEmailDelivery(btn) {
+      const origText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = 'Sending... ⏳';
+      try {
+        const res = await fetch('/api/admin/test-email', {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({ email: state.user?.email || 'rizwansaeed2980@gmail.com' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+        } else {
+          showToast(data.error || 'Test email failed. Please verify credentials.', 'error');
+        }
+      } catch (err) {
+        showToast('Network error testing email delivery', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+    }
+
   </script>
 </body>
 </html>

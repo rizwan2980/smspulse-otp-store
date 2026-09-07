@@ -853,6 +853,7 @@ function startPolling() {
 
 // Auth Modals
 function openLoginModal() {
+  if (state.user) { openProfileModal(); return; }
   const modal = document.getElementById('login-modal');
   if (modal) {
     modal.classList.add('open');
@@ -867,6 +868,7 @@ function closeLoginModal() {
 }
 
 function openRegisterModal() {
+  if (state.user) { openProfileModal(); return; }
   const modal = document.getElementById('register-modal');
   if (modal) {
     modal.classList.add('open');
@@ -1121,6 +1123,7 @@ function checkPasswordStrength(pw) {
 
 // Google Sign-In Modal Controls
 function handleGoogleSignIn(source = 'login') {
+  if (state.user) { openProfileModal(); return; }
   closeLoginModal();
   closeRegisterModal();
   const modal = document.getElementById('google-chooser-modal');
@@ -1205,15 +1208,6 @@ function openOtpModal(email, devCode = null, targetType = 'auth') {
     setTimeout(() => input.focus(), 200);
   }
 
-  const banner = document.getElementById('otp-security-banner');
-  const codeEl = document.getElementById('otp-security-code');
-  if (devCode && banner && codeEl) {
-    codeEl.textContent = devCode;
-    banner.style.display = 'block';
-  } else if (banner) {
-    banner.style.display = 'none';
-  }
-
   modal.classList.add('open');
 }
 
@@ -1260,12 +1254,16 @@ async function handleOtpVerificationSubmit(e) {
       state.user = data.user;
       localStorage.setItem('smspulse_userId', data.user.id);
       closeOtpModal();
+      closeRegisterModal();
+      closeLoginModal();
+      closeGoogleChooserModal();
       renderHeaderUser();
       fetchMyOrders();
       showToast(`🎉 Welcome ${data.user.name}! Your account is active!`, 'success');
-      setTimeout(() => {
-        window.location.reload();
-      }, 600);
+      // Remove ?action= from URL so register modal never reopens
+      if (window.location.search.includes('action=')) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     } else {
       showToast(data.error || 'Invalid verification code', 'error');
     }

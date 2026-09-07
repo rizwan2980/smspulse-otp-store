@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { readData, writeData } = require('../db');
+const { sendVerificationEmail } = require('../services/mailer');
 
 // In-memory caches for verification and reset codes
 const verificationCodes = new Map();
@@ -11,8 +12,8 @@ function generatePin() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// 1. Registration (Step 1: Request Code / Step 2: With Code)
-router.post('/register', (req, res) => {
+// 1. Registration
+router.post('/register', async (req, res) => {
   const { name, email, password, code } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
@@ -42,19 +43,20 @@ router.post('/register', (req, res) => {
     });
 
     console.log(`[REGISTER OTP ISSUED] ${cleanEmail} -> Code: ${pin}`);
+    sendVerificationEmail(cleanEmail, pin, 'Registration');
+
     return res.json({
       success: true,
       requireOtp: true,
       email: cleanEmail,
-      message: `Verification code sent to ${cleanEmail}`,
-      devCode: pin
+      message: `A 6-digit verification code has been sent to ${cleanEmail}. Please check your Inbox and Spam folder.`
     });
   }
 
   // If code is provided directly
   const cached = verificationCodes.get(cleanEmail);
   if (!cached || cached.code !== code.trim() || Date.now() > cached.expiresAt) {
-    return res.status(400).json({ error: 'Invalid or expired verification code' });
+    return res.status(400).json({ error: 'Invalid or expired verification code. Please check your email or click Resend.' });
   }
 
   const newUser = {
@@ -73,7 +75,7 @@ router.post('/register', (req, res) => {
   writeData('users', users);
   verificationCodes.delete(cleanEmail);
 
-  console.log(`[NEW USER REGISTERED & VERIFIED] ${newUser.name} (${newUser.email}) Balance: $0.00`);
+  console.log(`[NEW USER REGISTERED] ${newUser.name} (${newUser.email}) Balance: $0.00`);
 
   const { password: _, ...safeUser } = newUser;
   res.json({
@@ -83,8 +85,8 @@ router.post('/register', (req, res) => {
   });
 });
 
-// 2. Login (Step 1: Check credentials & send code / Step 2: Verify)
-router.post('/login', (req, res) => {
+// 2. Login
+router.post('/login', async (req, res) => {
   const { email, password, code } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
@@ -111,19 +113,20 @@ router.post('/login', (req, res) => {
     });
 
     console.log(`[LOGIN OTP ISSUED] ${cleanEmail} -> Code: ${pin}`);
+    sendVerificationEmail(cleanEmail, pin, 'Login Security');
+
     return res.json({
       success: true,
       requireOtp: true,
       email: cleanEmail,
-      message: `Security verification code sent to ${cleanEmail}`,
-      devCode: pin
+      message: `A 6-digit security code has been sent to ${cleanEmail}. Please check your Inbox and Spam folder.`
     });
   }
 
   // If code provided
   const cached = verificationCodes.get(cleanEmail);
   if (!cached || cached.code !== code.trim() || Date.now() > cached.expiresAt) {
-    return res.status(400).json({ error: 'Invalid or expired verification code' });
+    return res.status(400).json({ error: 'Invalid or expired verification code. Please check your email or click Resend.' });
   }
 
   verificationCodes.delete(cleanEmail);
@@ -132,7 +135,7 @@ router.post('/login', (req, res) => {
 });
 
 // 3. Google Sign-In with Verification Code
-router.post('/google', (req, res) => {
+router.post('/google', async (req, res) => {
   const { email, name, avatar, googleId, code } = req.body;
   if (!email) {
     return res.status(400).json({ error: 'Google email is required' });
@@ -152,19 +155,20 @@ router.post('/google', (req, res) => {
     });
 
     console.log(`[GOOGLE OTP ISSUED] ${cleanEmail} -> Code: ${pin}`);
+    sendVerificationEmail(cleanEmail, pin, 'Google Verification');
+
     return res.json({
       success: true,
       requireOtp: true,
       email: cleanEmail,
-      message: `Verification code sent to ${cleanEmail}`,
-      devCode: pin
+      message: `A 6-digit verification code has been sent to ${cleanEmail}. Please check your Inbox and Spam folder.`
     });
   }
 
   // If code provided, verify
   const cached = verificationCodes.get(cleanEmail);
   if (!cached || cached.code !== code.trim() || Date.now() > cached.expiresAt) {
-    return res.status(400).json({ error: 'Invalid or expired verification code' });
+    return res.status(400).json({ error: 'Invalid or expired verification code. Please check your email or click Resend.' });
   }
 
   const users = readData('users');
@@ -187,7 +191,7 @@ router.post('/google', (req, res) => {
       googleId: googleId || ('gid_' + Date.now()),
       authProvider: 'google',
       role: cleanEmail === 'rizwansaeed2980@gmail.com' ? 'admin' : 'user',
-      balanceUsd: 0.0, // Strictly 0 balance for all new users!
+      balanceUsd: 0.0,
       balancePkr: 0.0,
       createdAt: new Date().toISOString()
     };
@@ -217,12 +221,12 @@ router.post('/verify-code', (req, res) => {
   }
 
   if (cached.code !== code.trim()) {
-    return res.status(400).json({ error: 'Invalid verification code. Please check and try again.' });
+    return res.status(400).json({ error: 'Invalid verification code. Please check your Gmail inbox and try again.' });
   }
 
   if (Date.now() > cached.expiresAt) {
     verificationCodes.delete(cleanEmail);
-    return res.status(400).json({ error: 'Verification code has expired. Please click Resend Code.' });
+    return res.status(400).json({ error: 'Verification code has expired. Please click Resend New Code.' });
   }
 
   const users = readData('users');
@@ -293,7 +297,7 @@ router.post('/verify-code', (req, res) => {
 });
 
 // 5. Resend Code Endpoint
-router.post('/resend-code', (req, res) => {
+router.post('/resend-code', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required' });
 
@@ -309,34 +313,37 @@ router.post('/resend-code', (req, res) => {
   verificationCodes.set(cleanEmail, cached);
 
   console.log(`[OTP RESENT] ${cleanEmail} -> Code: ${newPin}`);
+  sendVerificationEmail(cleanEmail, newPin, 'Verification');
+
   res.json({
     success: true,
-    message: `A new verification code has been issued for ${cleanEmail}`,
-    devCode: newPin
+    message: `A new verification code has been sent to ${cleanEmail}. Please check your Inbox and Spam folder.`
   });
 });
 
 // 6. Permanent Password Reset - Step 1
-router.post('/forgot-password', (req, res) => {
+router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email address is required' });
 
+  const cleanEmail = email.toLowerCase().trim();
   const users = readData('users');
-  const user = users.find(u => u.email.toLowerCase() === email.toLowerCase().trim());
+  const user = users.find(u => u.email.toLowerCase() === cleanEmail);
   if (!user) {
     return res.json({ success: true, message: 'If an account exists, a reset code has been issued.' });
   }
 
   const code = generatePin();
-  resetTokens.set(email.toLowerCase().trim(), {
+  resetTokens.set(cleanEmail, {
     code,
     expiresAt: Date.now() + 15 * 60 * 1000
   });
 
+  sendVerificationEmail(cleanEmail, code, 'Password Reset');
+
   res.json({
     success: true,
-    message: `Your Password Reset PIN is: ${code}. Please enter it below to set a new password.`,
-    devCode: code
+    message: `Password Reset code sent to ${cleanEmail}. Please check your email inbox and enter it below.`
   });
 });
 
