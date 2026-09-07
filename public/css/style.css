@@ -377,6 +377,8 @@ button, input, select, textarea {
    ========================================================= */
 
 .sidebar-panel {
+  width: 340px;
+  min-width: 340px;
   background: var(--bg-card);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-card);
@@ -2349,4 +2351,264 @@ button, input, select, textarea {
 }
 .smart-info-list li {
   margin-bottom: 3px;
+}
+
+
+/* =========================================================
+   DEDICATED 100% RESPONSIVE MOBILE EXPERIENCE (<= 768px)
+   ========================================================= */
+
+@media (max-width: 768px) {
+  /* Prevent any horizontal screen spillover or zoom */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    position: relative;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Compact Native Mobile Header */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-top {
+    padding: 0.5rem 0.85rem !important;
+    height: 56px !important;
+  }
+
+  .brand-pulse-logo {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+  }
+
+  .brand-pulse-logo svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .brand-title-group h1 {
+    font-size: 1.15rem !important;
+  }
+
+  .brand-title-group span {
+    display: none !important;
+  }
+
+  /* Hide desktop text nav links from top row to prevent overflow */
+  .header-nav {
+    display: none !important;
+  }
+
+  .header-actions {
+    gap: 6px !important;
+  }
+
+  .header-actions .btn-icon {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.95rem !important;
+  }
+
+  /* Compact Wallet Chip on Mobile */
+  .user-wallet-badge {
+    padding: 3px 8px !important;
+    gap: 5px !important;
+  }
+
+  .wallet-balance-info {
+    font-size: 0.76rem !important;
+  }
+
+  .btn-pulse-topup {
+    padding: 3px 7px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .currency-toggle {
+    padding: 3px 6px !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* Sub-nav horizontal scroll without breaking page */
+  .sub-nav {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sub-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sub-nav-inner {
+    padding: 6px 12px !important;
+    width: max-content !important;
+    gap: 10px !important;
+  }
+
+  .sub-nav-links {
+    gap: 6px !important;
+  }
+
+  .sub-nav-item {
+    padding: 4px 10px !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* App Container: Clean Single Column on Mobile */
+  .app-container {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 12px !important;
+    margin: 0.75rem auto 5rem !important;
+    gap: 1.25rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .sidebar-panel {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+
+  .main-content {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Touch-friendly lists */
+  .scroll-list {
+    max-height: 220px !important;
+  }
+
+  .list-item {
+    padding: 10px 12px !important;
+    min-height: 44px !important;
+  }
+
+  .btn-buy-pulse {
+    height: 50px !important;
+    font-size: 1rem !important;
+    border-radius: 14px !important;
+  }
+
+  /* Promo Cards: Single column */
+  .fivesim-promo-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+
+  .fivesim-promo-card {
+    padding: 1.25rem !important;
+  }
+
+  /* Payment Page Mobile */
+  .payment-body {
+    padding: 1.25rem !important;
+  }
+
+  .payment-categories-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .pay-method-card {
+    padding: 1rem !important;
+  }
+
+  /* Modals on Mobile: Perfectly centered cards */
+  .modal-card {
+    width: calc(100% - 24px) !important;
+    max-width: 420px !important;
+    padding: 1.5rem 1.2rem !important;
+    border-radius: 20px !important;
+    margin: 12px auto !important;
+  }
+
+  /* Form inputs font size 16px to prevent iOS Safari auto-zoom */
+  .form-input {
+    font-size: 16px !important;
+    height: 48px !important;
+  }
+
+  /* Toast Container centered on mobile above app bar */
+  .toast-container {
+    left: 14px !important;
+    right: 14px !important;
+    bottom: 74px !important;
+    width: auto !important;
+  }
+
+  .toast-message {
+    font-size: 0.85rem !important;
+  }
+
+  /* Footer on mobile */
+  .footer-inner {
+    grid-template-columns: 1fr !important;
+    gap: 1.75rem !important;
+    padding: 2rem 1.25rem 5rem !important;
+  }
+
+  /* Mobile App Bottom Bar */
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12);
+    z-index: 999;
+    align-items: center;
+    justify-content: space-around;
+    padding: 4px 6px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .mobile-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    gap: 3px;
+    flex: 1;
+    padding: 6px 0;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .mobile-nav-btn.active, .mobile-nav-btn:hover {
+    color: var(--primary);
+  }
+
+  .mobile-nav-btn span.icon {
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+}
+
+/* Hide mobile bottom bar on desktop */
+@media (min-width: 769px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
 }

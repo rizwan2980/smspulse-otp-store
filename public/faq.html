@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Frequently Asked Questions (FAQ) — SMSPulse</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230284c7%22/><path d=%22M25 50h12l8-18 10 36 8-18h12%22 fill=%22none%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
-  <link rel="stylesheet" href="/css/style.css?v=3.1">
+  <link rel="stylesheet" href="/css/style.css?v=3.2">
 </head>
 <body>
   <header class="site-header">
@@ -69,6 +69,27 @@
     </div>
   </footer>
 
-  <script src="/js/app.js?v=3.1"></script>
+  <script src="/js/app.js?v=3.2"></script>
+
+  <!-- Mobile Floating App Navigation Bar (Dedicated Mobile Mode) -->
+  <nav class="mobile-bottom-nav">
+    <a href="/" class="mobile-nav-btn">
+      <span class="icon">⚡</span>
+      <span>Store</span>
+    </a>
+    <a href="javascript:void(0)" onclick="switchMainTab('active'); window.scrollTo({top: document.querySelector('.main-content')?.offsetTop - 70, behavior: 'smooth'});" class="mobile-nav-btn">
+      <span class="icon">📬</span>
+      <span>My OTPs</span>
+    </a>
+    <a href="/payment" class="mobile-nav-btn">
+      <span class="icon">💳</span>
+      <span>Top Up</span>
+    </a>
+    <a href="javascript:void(0)" onclick="if(state.user) openProfileModal(); else openLoginModal();" class="mobile-nav-btn">
+      <span class="icon">👤</span>
+      <span>Account</span>
+    </a>
+  </nav>
+
 </body>
 </html>
