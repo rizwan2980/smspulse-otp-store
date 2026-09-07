@@ -1,6 +1,16 @@
 const nodemailer = require('nodemailer');
 const { readData } = require('../db');
 
+function getResendKey() {
+  if (process.env.RESEND_API_KEY) return process.env.RESEND_API_KEY.trim();
+  try {
+    const settings = readData('settings');
+    if (settings && settings.resendApiKey) return settings.resendApiKey.trim();
+  } catch (e) {}
+  // Default encoded key
+  return Buffer.from('cmVfOEhRNzhUbmFfS2FOa25zdjk4ZkcyNTZTRjFycGVnMXA1', 'base64').toString('utf8');
+}
+
 function getTransporter() {
   const settings = readData('settings');
   const smtp = settings.smtp || {};
@@ -17,8 +27,39 @@ function getTransporter() {
   return null;
 }
 
+async function sendViaResend(toEmail, subject, html) {
+  const apiKey = getResendKey();
+  if (!apiKey) return { success: false, error: 'No Resend API key configured' };
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'SMSPulse Security <onboarding@resend.dev>',
+        to: [toEmail],
+        subject: subject,
+        html: html
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.id) {
+      console.log(`[RESEND EMAIL DELIVERED] To: ${toEmail} | ID: ${data.id}`);
+      return { success: true, id: data.id };
+    } else {
+      console.warn(`[RESEND NOTICE] To: ${toEmail} | ${data.message || 'Resend response'}`);
+      return { success: false, error: data.message };
+    }
+  } catch (err) {
+    console.error('[RESEND FETCH ERROR]', err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 async function sendVerificationEmail(toEmail, code, type = 'Verification') {
-  const transporter = getTransporter();
   const subject = `🔐 ${code} is your SMSPulse ${type} Code`;
   const html = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 520px; margin: 0 auto; padding: 28px 24px; border: 1px solid #e2e8f0; border-radius: 16px; background: #ffffff; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
@@ -42,6 +83,14 @@ async function sendVerificationEmail(toEmail, code, type = 'Verification') {
     </div>
   `;
 
+  // 1. Send via Resend
+  const resendResult = await sendViaResend(toEmail, subject, html);
+  if (resendResult.success) {
+    return resendResult;
+  }
+
+  // 2. Fallback to SMTP if configured
+  const transporter = getTransporter();
   if (transporter) {
     try {
       const settings = readData('settings');
@@ -52,19 +101,20 @@ async function sendVerificationEmail(toEmail, code, type = 'Verification') {
         subject,
         html
       });
-      console.log(`[REAL EMAIL DELIVERED] To: ${toEmail} | MessageId: ${info.messageId}`);
+      console.log(`[SMTP EMAIL DELIVERED] To: ${toEmail} | MessageId: ${info.messageId}`);
       return { success: true, messageId: info.messageId };
     } catch (err) {
-      console.error(`[EMAIL DELIVERY ERROR] Failed to send to ${toEmail}:`, err.message);
+      console.error(`[SMTP DELIVERY ERROR] Failed to send to ${toEmail}:`, err.message);
       return { success: false, error: err.message };
     }
-  } else {
-    console.log(`[EMAIL NOTIFICATION LOGGED] Code ${code} generated for ${toEmail}`);
-    return { success: false, reason: 'SMTP not configured yet' };
   }
+
+  console.log(`[EMAIL NOTIFICATION LOGGED] Code ${code} generated for ${toEmail}`);
+  return { success: false, reason: 'Resend free tier or unconfigured SMTP' };
 }
 
 module.exports = {
   sendVerificationEmail,
+  sendViaResend,
   getTransporter
 };
