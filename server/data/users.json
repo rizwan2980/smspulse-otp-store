@@ -143,8 +143,8 @@
     "password": "Password@786",
     "authProvider": "email",
     "role": "user",
-    "balanceUsd": 10,
-    "balancePkr": 2800,
+    "balanceUsd": 0,
+    "balancePkr": 0,
     "createdAt": "2026-09-06T13:06:06.501Z"
   },
   {

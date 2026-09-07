@@ -2,40 +2,78 @@ const express = require('express');
 const router = express.Router();
 const { readData, writeData } = require('../db');
 
-// Permanent in-memory cache for reset tokens
+// In-memory caches for verification and reset codes
+const verificationCodes = new Map();
 const resetTokens = new Map();
 
-// 1. Permanent Instant Registration (5SIM & SMS-Activate Standard)
+// Helper: generate 6-digit numeric PIN
+function generatePin() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// 1. Registration (Step 1: Request Code / Step 2: With Code)
 router.post('/register', (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, code } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
+  const cleanEmail = email.toLowerCase().trim();
   const users = readData('users');
-  const existing = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const existing = users.find(u => u.email.toLowerCase() === cleanEmail);
   if (existing) {
     return res.status(400).json({ error: 'An account with this email already exists. Please Sign In.' });
   }
 
-  const cleanName = name && name.trim() ? name.trim() : email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+  }
+
+  const cleanName = name && name.trim() ? name.trim() : cleanEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+  // If code is not provided, issue verification code
+  if (!code) {
+    const pin = generatePin();
+    verificationCodes.set(cleanEmail, {
+      code: pin,
+      type: 'register',
+      payload: { name: cleanName, email: cleanEmail, password },
+      expiresAt: Date.now() + 10 * 60 * 1000
+    });
+
+    console.log(`[REGISTER OTP ISSUED] ${cleanEmail} -> Code: ${pin}`);
+    return res.json({
+      success: true,
+      requireOtp: true,
+      email: cleanEmail,
+      message: `Verification code sent to ${cleanEmail}`,
+      devCode: pin
+    });
+  }
+
+  // If code is provided directly
+  const cached = verificationCodes.get(cleanEmail);
+  if (!cached || cached.code !== code.trim() || Date.now() > cached.expiresAt) {
+    return res.status(400).json({ error: 'Invalid or expired verification code' });
+  }
 
   const newUser = {
     id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
     name: cleanName,
-    email: email.toLowerCase().trim(),
+    email: cleanEmail,
     password: password,
     authProvider: 'email',
-    role: 'user',
-    balanceUsd: 0.0, // 0 balance: User must deposit funds first
+    role: cleanEmail === 'rizwansaeed2980@gmail.com' ? 'admin' : 'user',
+    balanceUsd: 0.0,
     balancePkr: 0.0,
     createdAt: new Date().toISOString()
   };
 
   users.push(newUser);
   writeData('users', users);
+  verificationCodes.delete(cleanEmail);
 
-  console.log(`[NEW PERMANENT USER CREATED] ${newUser.name} (${newUser.email}) with $0.00 balance`);
+  console.log(`[NEW USER REGISTERED & VERIFIED] ${newUser.name} (${newUser.email}) Balance: $0.00`);
 
   const { password: _, ...safeUser } = newUser;
   res.json({
@@ -45,35 +83,91 @@ router.post('/register', (req, res) => {
   });
 });
 
-// 2. Permanent Standard Login
+// 2. Login (Step 1: Check credentials & send code / Step 2: Verify)
 router.post('/login', (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, code } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
   }
 
+  const cleanEmail = email.toLowerCase().trim();
   const users = readData('users');
   const user = users.find(
-    u => u.email.toLowerCase() === email.toLowerCase().trim() && u.password === password
+    u => u.email.toLowerCase() === cleanEmail && u.password === password
   );
 
   if (!user) {
     return res.status(401).json({ error: 'Invalid email or password. Please try again.' });
   }
 
+  // If code not provided, issue 2FA login verification code
+  if (!code) {
+    const pin = generatePin();
+    verificationCodes.set(cleanEmail, {
+      code: pin,
+      type: 'login',
+      payload: { userId: user.id },
+      expiresAt: Date.now() + 10 * 60 * 1000
+    });
+
+    console.log(`[LOGIN OTP ISSUED] ${cleanEmail} -> Code: ${pin}`);
+    return res.json({
+      success: true,
+      requireOtp: true,
+      email: cleanEmail,
+      message: `Security verification code sent to ${cleanEmail}`,
+      devCode: pin
+    });
+  }
+
+  // If code provided
+  const cached = verificationCodes.get(cleanEmail);
+  if (!cached || cached.code !== code.trim() || Date.now() > cached.expiresAt) {
+    return res.status(400).json({ error: 'Invalid or expired verification code' });
+  }
+
+  verificationCodes.delete(cleanEmail);
   const { password: _, ...safeUser } = user;
   res.json({ success: true, user: safeUser, message: `Welcome back, ${user.name}!` });
 });
 
-// 3. Permanent Google / Gmail Sign-In
+// 3. Google Sign-In with Verification Code
 router.post('/google', (req, res) => {
-  const { email, name, avatar, googleId } = req.body;
+  const { email, name, avatar, googleId, code } = req.body;
   if (!email) {
     return res.status(400).json({ error: 'Google email is required' });
   }
 
-  const users = readData('users');
   const cleanEmail = email.toLowerCase().trim();
+  const cleanName = name && name.trim() ? name.trim() : cleanEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+  // If code not provided, require OTP verification before activating
+  if (!code) {
+    const pin = generatePin();
+    verificationCodes.set(cleanEmail, {
+      code: pin,
+      type: 'google',
+      payload: { email: cleanEmail, name: cleanName, avatar, googleId },
+      expiresAt: Date.now() + 10 * 60 * 1000
+    });
+
+    console.log(`[GOOGLE OTP ISSUED] ${cleanEmail} -> Code: ${pin}`);
+    return res.json({
+      success: true,
+      requireOtp: true,
+      email: cleanEmail,
+      message: `Verification code sent to ${cleanEmail}`,
+      devCode: pin
+    });
+  }
+
+  // If code provided, verify
+  const cached = verificationCodes.get(cleanEmail);
+  if (!cached || cached.code !== code.trim() || Date.now() > cached.expiresAt) {
+    return res.status(400).json({ error: 'Invalid or expired verification code' });
+  }
+
+  const users = readData('users');
   let user = users.find(u => u.email.toLowerCase() === cleanEmail);
   let isNew = false;
 
@@ -81,10 +175,10 @@ router.post('/google', (req, res) => {
     user.authProvider = user.authProvider || 'google';
     if (avatar && !user.avatar) user.avatar = avatar;
     if (googleId && !user.googleId) user.googleId = googleId;
+    if (cleanEmail === 'rizwansaeed2980@gmail.com') user.role = 'admin';
     writeData('users', users);
   } else {
     isNew = true;
-    const cleanName = name && name.trim() ? name.trim() : cleanEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     user = {
       id: 'usr_g_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
       name: cleanName,
@@ -92,8 +186,8 @@ router.post('/google', (req, res) => {
       avatar: avatar || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(cleanName)),
       googleId: googleId || ('gid_' + Date.now()),
       authProvider: 'google',
-      role: 'user',
-      balanceUsd: 5.0,
+      role: cleanEmail === 'rizwansaeed2980@gmail.com' ? 'admin' : 'user',
+      balanceUsd: 0.0, // Strictly 0 balance for all new users!
       balancePkr: 0.0,
       createdAt: new Date().toISOString()
     };
@@ -101,13 +195,128 @@ router.post('/google', (req, res) => {
     writeData('users', users);
   }
 
-  console.log(`[GOOGLE USER SIGN-IN] ${user.name} (${user.email}) - IsNew: ${isNew}`);
+  verificationCodes.delete(cleanEmail);
+  console.log(`[GOOGLE VERIFIED] ${user.name} (${user.email}) - IsNew: ${isNew}, Balance: $${user.balanceUsd}`);
 
   const { password: _, ...safeUser } = user;
   res.json({ success: true, user: safeUser, isNew });
 });
 
-// 4. Permanent Password Reset - Step 1
+// 4. Universal Code Verification Endpoint
+router.post('/verify-code', (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ error: 'Email and verification code are required' });
+  }
+
+  const cleanEmail = email.toLowerCase().trim();
+  const cached = verificationCodes.get(cleanEmail);
+
+  if (!cached) {
+    return res.status(400).json({ error: 'No active verification request found. Please request a new code.' });
+  }
+
+  if (cached.code !== code.trim()) {
+    return res.status(400).json({ error: 'Invalid verification code. Please check and try again.' });
+  }
+
+  if (Date.now() > cached.expiresAt) {
+    verificationCodes.delete(cleanEmail);
+    return res.status(400).json({ error: 'Verification code has expired. Please click Resend Code.' });
+  }
+
+  const users = readData('users');
+
+  if (cached.type === 'register') {
+    const { name, password } = cached.payload;
+    const newUser = {
+      id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+      name: name,
+      email: cleanEmail,
+      password: password,
+      authProvider: 'email',
+      role: cleanEmail === 'rizwansaeed2980@gmail.com' ? 'admin' : 'user',
+      balanceUsd: 0.0,
+      balancePkr: 0.0,
+      createdAt: new Date().toISOString()
+    };
+    users.push(newUser);
+    writeData('users', users);
+    verificationCodes.delete(cleanEmail);
+
+    const { password: _, ...safeUser } = newUser;
+    return res.json({
+      success: true,
+      user: safeUser,
+      message: `Account activated successfully!`
+    });
+  }
+
+  if (cached.type === 'login') {
+    const user = users.find(u => u.id === cached.payload.userId || u.email.toLowerCase() === cleanEmail);
+    verificationCodes.delete(cleanEmail);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const { password: _, ...safeUser } = user;
+    return res.json({ success: true, user: safeUser, message: `Welcome back, ${user.name}!` });
+  }
+
+  if (cached.type === 'google') {
+    const { name, avatar, googleId } = cached.payload;
+    let user = users.find(u => u.email.toLowerCase() === cleanEmail);
+    let isNew = false;
+    if (user) {
+      if (cleanEmail === 'rizwansaeed2980@gmail.com') user.role = 'admin';
+      writeData('users', users);
+    } else {
+      isNew = true;
+      user = {
+        id: 'usr_g_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+        name: name,
+        email: cleanEmail,
+        avatar: avatar || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(name)),
+        googleId: googleId || ('gid_' + Date.now()),
+        authProvider: 'google',
+        role: cleanEmail === 'rizwansaeed2980@gmail.com' ? 'admin' : 'user',
+        balanceUsd: 0.0,
+        balancePkr: 0.0,
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+      writeData('users', users);
+    }
+    verificationCodes.delete(cleanEmail);
+    const { password: _, ...safeUser } = user;
+    return res.json({ success: true, user: safeUser, isNew, message: `Welcome ${user.name}!` });
+  }
+
+  res.status(400).json({ error: 'Unknown verification action' });
+});
+
+// 5. Resend Code Endpoint
+router.post('/resend-code', (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email is required' });
+
+  const cleanEmail = email.toLowerCase().trim();
+  const cached = verificationCodes.get(cleanEmail);
+  if (!cached) {
+    return res.status(400).json({ error: 'No active session found. Please try signing in again.' });
+  }
+
+  const newPin = generatePin();
+  cached.code = newPin;
+  cached.expiresAt = Date.now() + 10 * 60 * 1000;
+  verificationCodes.set(cleanEmail, cached);
+
+  console.log(`[OTP RESENT] ${cleanEmail} -> Code: ${newPin}`);
+  res.json({
+    success: true,
+    message: `A new verification code has been issued for ${cleanEmail}`,
+    devCode: newPin
+  });
+});
+
+// 6. Permanent Password Reset - Step 1
 router.post('/forgot-password', (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email address is required' });
@@ -118,7 +327,7 @@ router.post('/forgot-password', (req, res) => {
     return res.json({ success: true, message: 'If an account exists, a reset code has been issued.' });
   }
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const code = generatePin();
   resetTokens.set(email.toLowerCase().trim(), {
     code,
     expiresAt: Date.now() + 15 * 60 * 1000
@@ -131,7 +340,7 @@ router.post('/forgot-password', (req, res) => {
   });
 });
 
-// 5. Permanent Password Reset - Step 2
+// 7. Permanent Password Reset - Step 2
 router.post('/reset-password', (req, res) => {
   const { email, code, newPassword } = req.body;
   if (!email || !code || !newPassword) {
@@ -155,7 +364,7 @@ router.post('/reset-password', (req, res) => {
   res.json({ success: true, message: 'Password has been reset successfully! You can now sign in.' });
 });
 
-// 6. Change Password (Logged-in profile)
+// 8. Change Password (Logged-in profile)
 router.post('/change-password', (req, res) => {
   const userId = req.headers['x-user-id'];
   const { currentPassword, newPassword } = req.body;
@@ -178,7 +387,7 @@ router.post('/change-password', (req, res) => {
   res.json({ success: true, message: 'Password updated successfully' });
 });
 
-// 7. Get Profile
+// 9. Get Profile
 router.get('/me', (req, res) => {
   const userId = req.headers['x-user-id'];
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });

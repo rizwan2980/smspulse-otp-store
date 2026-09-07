@@ -4,6 +4,7 @@
    ========================================================= */
 
 const state = {
+  pendingAuth: null,
   siteName: 'SMSPulse',
   user: null,
   currency: localStorage.getItem('smspulse_currency') || 'PKR',
@@ -923,7 +924,7 @@ async function handleLoginSubmit(e) {
   const origText = submitBtn ? submitBtn.innerHTML : 'Sign In';
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = 'Signing in... ⏳';
+    submitBtn.innerHTML = 'Verifying... ⏳';
   }
 
   try {
@@ -933,16 +934,19 @@ async function handleLoginSubmit(e) {
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
-    if (data.success) {
+    if (data.requireOtp) {
+      state.pendingAuth = { email: data.email, type: 'login' };
+      closeLoginModal();
+      openOtpModal(data.email, data.devCode, 'login');
+      showToast(data.message || 'Security code issued. Please enter code to continue.', 'info');
+    } else if (data.success) {
       state.user = data.user;
       localStorage.setItem('smspulse_userId', data.user.id);
       closeLoginModal();
       renderHeaderUser();
       fetchMyOrders();
       showToast(`Welcome back, ${data.user.name}!`, 'success');
-      setTimeout(() => {
-        window.location.reload();
-      }, 600);
+      setTimeout(() => window.location.reload(), 600);
     } else {
       showToast(data.error || 'Invalid email or password', 'error');
     }
@@ -956,9 +960,6 @@ async function handleLoginSubmit(e) {
     }
   }
 }
-
-// Handle register submit
-let pendingRegistrationEmail = '';
 
 async function handleRegisterSubmit(e) {
   if (e) e.preventDefault();
@@ -984,7 +985,7 @@ async function handleRegisterSubmit(e) {
   const origText = submitBtn ? submitBtn.innerHTML : 'Create Account';
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = 'Creating Account... ⏳';
+    submitBtn.innerHTML = 'Sending Code... ⏳';
   }
 
   try {
@@ -994,16 +995,19 @@ async function handleRegisterSubmit(e) {
       body: JSON.stringify({ name: name || email.split('@')[0], email, password })
     });
     const data = await res.json();
-    if (data.success) {
+    if (data.requireOtp) {
+      state.pendingAuth = { email: data.email, type: 'register' };
+      closeRegisterModal();
+      openOtpModal(data.email, data.devCode, 'register');
+      showToast('Verification code issued. Please enter code to activate account.', 'info');
+    } else if (data.success) {
       state.user = data.user;
       localStorage.setItem("smspulse_userId", data.user.id);
       closeRegisterModal();
       renderHeaderUser();
       fetchMyOrders();
-      showToast(`🎉 Welcome ${data.user.name}! Your account has been created successfully!`, "success");
-      setTimeout(() => {
-        window.location.reload();
-      }, 600);
+      showToast(`🎉 Welcome ${data.user.name}! Your account has been created!`, "success");
+      setTimeout(() => window.location.reload(), 600);
     } else {
       showToast(data.error || "Registration failed", "error");
     }
@@ -1067,7 +1071,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // Google Sign-In & Authentication Upgrades
 // ==========================================================================
 
-// Toggle Password Visibility (Show/Hide)
 function togglePasswordVisibility(inputId, btn) {
   const input = document.getElementById(inputId);
   if (!input) return;
@@ -1080,7 +1083,6 @@ function togglePasswordVisibility(inputId, btn) {
   }
 }
 
-// Real-Time Password Strength Checker
 function checkPasswordStrength(pw) {
   const fill = document.getElementById('pw-strength-fill');
   const text = document.getElementById('pw-strength-text');
@@ -1117,11 +1119,7 @@ function checkPasswordStrength(pw) {
   }
 }
 
-// One-Click Google / Gmail Sign-In Handler
-
-// ==========================================================================
-// Google Multi-Account Selector Modal Controls
-// ==========================================================================
+// Google Sign-In Modal Controls
 function handleGoogleSignIn(source = 'login') {
   closeLoginModal();
   closeRegisterModal();
@@ -1141,12 +1139,6 @@ function closeGoogleChooserModal() {
   if (modal) modal.classList.remove('open');
 }
 
-async function quickGoogleSignIn(email, name) {
-  const avatar = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(name || email.split('@')[0]);
-  closeGoogleChooserModal();
-  await executeGoogleAuth(email.toLowerCase(), name, avatar, 'gid_' + Date.now());
-}
-
 async function handleGoogleSubmit(e) {
   if (e) e.preventDefault();
   const input = document.getElementById('google-input-email');
@@ -1162,45 +1154,162 @@ async function handleGoogleSubmit(e) {
 
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = 'Connecting to Google... ⏳';
+    btn.innerHTML = 'Sending Code... ⏳';
   }
 
-  await executeGoogleAuth(email, name, avatar, 'gid_' + Date.now());
-}
-
-async function executeGoogleAuth(email, name, avatar, googleId) {
   try {
-    showToast(`Connecting Google account: ${email}...`, 'info');
     const res = await fetch('/api/auth/google', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name, avatar, googleId })
+      body: JSON.stringify({ email, name, avatar, googleId: 'gid_' + Date.now() })
     });
     const data = await res.json();
-    if (data.success) {
+    if (data.requireOtp) {
+      state.pendingAuth = { email: data.email, type: 'google' };
+      closeGoogleChooserModal();
+      openOtpModal(data.email, data.devCode, 'google');
+      showToast('Verification code issued. Please enter code to sign in.', 'info');
+    } else if (data.success) {
       state.user = data.user;
       localStorage.setItem('smspulse_userId', data.user.id);
       closeGoogleChooserModal();
-      closeLoginModal();
-      closeRegisterModal();
       renderHeaderUser();
       fetchMyOrders();
-      if (data.isNew) {
-        showToast(`🎉 Welcome ${data.user.name}! Google account created!`, 'success');
-      } else {
-        showToast(`Welcome back, ${data.user.name}!`, 'success');
-      }
-      setTimeout(() => {
-        window.location.reload();
-      }, 600);
+      showToast(`Welcome back, ${data.user.name}!`, 'success');
+      setTimeout(() => window.location.reload(), 600);
     } else {
       showToast(data.error || 'Google Sign-In failed', 'error');
     }
   } catch (err) {
     console.error('Google Sign-In error:', err);
     showToast('Network error during Google Sign-In', 'error');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = 'Send Verification Code →';
+    }
   }
 }
+
+
+function openOtpModal(email, devCode = null, targetType = 'auth') {
+  const modal = document.getElementById('otp-modal');
+  if (!modal) return;
+
+  const targetEmailEl = document.getElementById('otp-target-email');
+  if (targetEmailEl) targetEmailEl.textContent = email;
+
+  const input = document.getElementById('email-otp-input');
+  if (input) {
+    input.value = '';
+    setTimeout(() => input.focus(), 200);
+  }
+
+  const banner = document.getElementById('otp-security-banner');
+  const codeEl = document.getElementById('otp-security-code');
+  if (devCode && banner && codeEl) {
+    codeEl.textContent = devCode;
+    banner.style.display = 'block';
+  } else if (banner) {
+    banner.style.display = 'none';
+  }
+
+  modal.classList.add('open');
+}
+
+function closeOtpModal() {
+  const modal = document.getElementById('otp-modal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function handleOtpVerificationSubmit(e) {
+  if (e) e.preventDefault();
+  const input = document.getElementById('email-otp-input');
+  const submitBtn = document.getElementById('btn-otp-verify-submit');
+  const code = input ? input.value.trim() : '';
+
+  if (!code || code.length !== 6) {
+    showToast('Please enter the 6-digit verification code', 'error');
+    return;
+  }
+
+  if (!state.pendingAuth || !state.pendingAuth.email) {
+    showToast('Session expired. Please try signing in again.', 'error');
+    closeOtpModal();
+    return;
+  }
+
+  const origText = submitBtn ? submitBtn.innerHTML : 'Verify & Continue →';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Verifying Code... ⏳';
+  }
+
+  try {
+    const res = await fetch('/api/auth/verify-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: state.pendingAuth.email,
+        code: code
+      })
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      state.user = data.user;
+      localStorage.setItem('smspulse_userId', data.user.id);
+      closeOtpModal();
+      renderHeaderUser();
+      fetchMyOrders();
+      showToast(`🎉 Welcome ${data.user.name}! Your account is active!`, 'success');
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
+    } else {
+      showToast(data.error || 'Invalid verification code', 'error');
+    }
+  } catch (err) {
+    console.error('OTP verification error:', err);
+    showToast('Network error during verification', 'error');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = origText;
+    }
+  }
+}
+
+async function resendOtpCode() {
+  if (!state.pendingAuth || !state.pendingAuth.email) {
+    showToast('No active session found. Please sign in again.', 'error');
+    return;
+  }
+
+  try {
+    showToast('Issuing fresh verification code...', 'info');
+    const res = await fetch('/api/auth/resend-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: state.pendingAuth.email })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message, 'success');
+      const banner = document.getElementById('otp-security-banner');
+      const codeEl = document.getElementById('otp-security-code');
+      if (data.devCode && banner && codeEl) {
+        codeEl.textContent = data.devCode;
+        banner.style.display = 'block';
+      }
+    } else {
+      showToast(data.error || 'Failed to resend code', 'error');
+    }
+  } catch (err) {
+    showToast('Network error requesting new code', 'error');
+  }
+}
+
 
 // Forgot Password Modal Controls
 function openForgotPasswordModal() {
