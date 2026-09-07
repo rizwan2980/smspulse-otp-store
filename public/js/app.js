@@ -1066,7 +1066,14 @@ function handleGoogleSignIn(source = 'login') {
   closeLoginModal();
   closeRegisterModal();
   const modal = document.getElementById('google-chooser-modal');
-  if (modal) modal.classList.add('open');
+  if (modal) {
+    modal.classList.add('open');
+    const input = document.getElementById('google-input-email');
+    if (input) {
+      input.value = '';
+      setTimeout(() => input.focus(), 150);
+    }
+  }
 }
 
 function closeGoogleChooserModal() {
@@ -1074,55 +1081,18 @@ function closeGoogleChooserModal() {
   if (modal) modal.classList.remove('open');
 }
 
-// When user clicks their Gmail account in the list
-async function selectGoogleAccount(email, name, avatar) {
+async function handleGoogleSubmit(e) {
+  e.preventDefault();
+  const input = document.getElementById('google-input-email');
+  if (!input || !input.value.trim()) return;
+
+  const email = input.value.trim().toLowerCase();
+  const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const avatar = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(name);
+
   closeGoogleChooserModal();
   showToast(`Signing in with ${email}...`, 'info');
   await executeGoogleAuth(email, name, avatar, 'gid_' + Date.now());
-}
-
-// Prompt for custom Gmail if user clicks "+ Use another Google account"
-async function promptCustomGoogleAccount() {
-  const customEmail = prompt('Sign in with another Google Account:\nEnter your Gmail address:');
-  if (!customEmail || !customEmail.trim()) return;
-
-  const email = customEmail.trim().toLowerCase();
-  if (!email.includes('@') || !email.includes('.')) {
-    showToast('Please enter a valid Gmail address', 'error');
-    return;
-  }
-
-  const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-  const avatar = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(name);
-  await selectGoogleAccount(email, name, avatar);
-}
-
-async function executeGoogleAuth(email, name, avatar, googleId) {
-  try {
-    const res = await fetch('/api/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name, avatar, googleId })
-    });
-    const data = await res.json();
-    if (data.success) {
-      state.user = data.user;
-      localStorage.setItem('smspulse_userId', data.user.id);
-      closeLoginModal();
-      closeRegisterModal();
-      renderHeaderUser();
-      fetchMyOrders();
-      if (data.isNew) {
-        showToast(`🎉 Welcome ${data.user.name}! Account created successfully!`, 'success');
-      } else {
-        showToast(`Signed in with Google as ${data.user.name}`, 'success');
-      }
-    } else {
-      showToast(data.error || 'Google Sign-In failed', 'error');
-    }
-  } catch (err) {
-    showToast('Network error during Google Sign-In', 'error');
-  }
 }
 
 // Forgot Password Modal Controls
