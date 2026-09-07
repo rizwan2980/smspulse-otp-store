@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Funds — SMSPulse Wallet Deposit</title>
+  <meta name="description" content="Top up your SMSPulse wallet balance using Binance USDT (Crypto) or Direct Bank Transfer. Fast automated crediting.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230284c7%22/><path d=%22M25 50h12l8-18 10 36 8-18h12%22 fill=%22none%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="site-header">
+    <div class="header-top">
+      <div class="header-brand" onclick="window.location.href='/'">
+        <div class="brand-pulse-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div class="brand-title-group">
+          <h1 class="site-brand-name">SMSPulse</h1>
+          <span>Virtual Numbers & OTP Service</span>
+        </div>
+      </div>
+
+      <nav class="header-nav">
+        <a href="/" class="nav-link">Store</a>
+        <a href="/payment" class="nav-link active">Recharge Wallet <span class="badge-nav">Top Up</span></a>
+        <a href="/faq" class="nav-link">FAQ & Help</a>
+        <a href="/docs" class="nav-link">Developer API</a>
+        <a href="/admin" class="nav-link">Admin Console</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-icon btn-ghost btn-toggle-theme" onclick="toggleTheme()">🌙</button>
+        <div id="header-user-area" style="display:flex; align-items:center; gap:8px;"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Secondary Navigation -->
+  <div class="sub-nav">
+    <div class="sub-nav-inner">
+      <div class="sub-nav-links">
+        <a href="/" class="sub-nav-item">← Back to Numbers Store</a>
+        <a href="/payment" class="sub-nav-item active">Add Funds</a>
+        <a href="/faq" class="sub-nav-item">Deposit Instructions</a>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span class="trust-badge-item">🛡️ Guaranteed Secure Payment</span>
+        <span style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Rate: 1 USD = 280 PKR</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div style="max-width: 1100px; margin: 2rem auto 4rem; padding: 0 1.5rem; flex: 1; width: 100%;">
+
+    <div class="payment-page-card">
+      <!-- Tabs: Recharge & History -->
+      <div class="payment-nav-tabs">
+        <button class="pay-tab-btn active" id="tab-btn-recharge" onclick="switchPayTab('recharge')">
+          ⚡ Recharge Balance
+        </button>
+        <button class="pay-tab-btn" id="tab-btn-history" onclick="switchPayTab('history')">
+          📋 My Deposit History
+        </button>
+      </div>
+
+      <!-- Tab 1: Recharge Body -->
+      <div class="payment-body" id="pay-panel-recharge">
+        
+        <div style="margin-bottom: 1.5rem;">
+          <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 4px;">Choose Payment Channel</h2>
+          <p style="font-size: 0.9rem; color: var(--text-muted);">
+            Deposit via Binance Pay, USDT (TRC20 / BEP20), Solana, TRX, Dogecoin, or MCB Bank Transfer with 0% extra fees.
+          </p>
+        </div>
+
+        <!-- Category Filter Tabs -->
+        <div class="pay-filter-chips" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:1.25rem;">
+          <button type="button" class="btn btn-sm btn-outline active pay-cat-btn" onclick="filterPaymentCategory('all', this)" style="border-radius:var(--radius-full); font-size:0.82rem; padding:6px 14px;">All Channels (7)</button>
+          <button type="button" class="btn btn-sm btn-outline pay-cat-btn" onclick="filterPaymentCategory('stable', this)" style="border-radius:var(--radius-full); font-size:0.82rem; padding:6px 14px;">USDT & Binance Pay</button>
+          <button type="button" class="btn btn-sm btn-outline pay-cat-btn" onclick="filterPaymentCategory('crypto', this)" style="border-radius:var(--radius-full); font-size:0.82rem; padding:6px 14px;">Other Crypto (SOL, TRX, DOGE)</button>
+          <button type="button" class="btn btn-sm btn-outline pay-cat-btn" onclick="filterPaymentCategory('bank', this)" style="border-radius:var(--radius-full); font-size:0.82rem; padding:6px 14px;">MCB Bank Transfer</button>
+        </div>
+
+        <!-- Payment Methods Grid -->
+        <div class="payment-categories-grid" id="methods-grid">
+          <!-- Populated by payment logic -->
+        </div>
+
+        <!-- Selected Method Deposit Details Box -->
+        <div class="deposit-detail-box" id="selected-method-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span id="active-method-icon" style="font-size:1.8rem;">🪙</span>
+              <div>
+                <h3 id="active-method-name" style="font-size:1.15rem; font-weight:800;">Binance USDT (TRC-20)</h3>
+                <span id="active-method-badge" class="method-badge badge-crypto">Recommended (0% Fee)</span>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <span style="font-size:0.8rem; color:var(--text-muted); display:block;">Processing Fee:</span>
+              <strong style="color:var(--brand-emerald);">0% (Zero Extra Fee)</strong>
+            </div>
+          </div>
+
+          <!-- Account details for transfer -->
+          <div class="account-credentials-row">
+            <div>
+              <span style="font-size:0.8rem; color:var(--text-muted); display:block;" id="cred-title-label">Account Title / Receiver:</span>
+              <strong style="font-size:1.05rem;" id="cred-title-value">TRC20 Network / Binance Pay</strong>
+            </div>
+            <div>
+              <span style="font-size:0.8rem; color:var(--text-muted); display:block;" id="cred-number-label">Account / IBAN / Wallet:</span>
+              <strong style="font-size:1.1rem; color:var(--primary); font-family:var(--font-mono);" id="cred-number-value">TYj4K6M9eP8Q7wX1z2L3v4B5n6M7q8R9sT</strong>
+            </div>
+            <button class="btn-copy" id="btn-copy-acc" onclick="copyToClipboard(document.getElementById('cred-number-value').innerText, this)">
+              📋 Copy Account Number
+            </button>
+          </div>
+
+          <p id="active-method-instructions" style="font-size:0.85rem; color:var(--text-muted); margin-top:1rem; line-height:1.5;">
+            Send USDT via Binance Pay ID or TRC-20 address, then paste your TxID / Order ID below.
+          </p>
+        </div>
+
+        <!-- Deposit Submission Form -->
+        <form onsubmit="handleDepositSubmit(event)" style="background:var(--bg-card); border-radius:var(--radius-xl); border:1.5px solid var(--border-color); padding:1.75rem;">
+          <h3 style="font-size:1.15rem; font-weight:800; margin-bottom:1rem;">Enter Deposit Amount & TID</h3>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+            <div class="form-group">
+              <label class="form-label">Amount in PKR (₨)</label>
+              <input type="number" step="10" min="280" id="dep-amount-pkr" class="form-input" value="1400" oninput="syncUsdFromPkr(this.value)" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Amount in USD ($)</label>
+              <input type="number" step="0.5" min="1" id="dep-amount-usd" class="form-input" value="5.00" oninput="syncPkrFromUsd(this.value)" required>
+            </div>
+          </div>
+
+          <div class="quick-amount-buttons">
+            <span style="font-size:0.85rem; font-weight:700; color:var(--text-muted); align-self:center; margin-right:4px;">Quick Select:</span>
+            <button type="button" class="quick-amt-btn" onclick="setQuickAmount(1)">₨ 280 ($1)</button>
+            <button type="button" class="quick-amt-btn active" onclick="setQuickAmount(5)">₨ 1,400 ($5)</button>
+            <button type="button" class="quick-amt-btn" onclick="setQuickAmount(10)">₨ 2,800 ($10)</button>
+            <button type="button" class="quick-amt-btn" onclick="setQuickAmount(25)">₨ 7,000 ($25)</button>
+            <button type="button" class="quick-amt-btn" onclick="setQuickAmount(50)">₨ 14,000 ($50)</button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Transaction ID (TID / TxHash / Trx ID) *</label>
+            <input type="text" id="dep-tid" class="form-input" placeholder="e.g. 84920184719 or 0x3f982..." required>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Enter the blockchain TxHash, Binance Pay Order ID, or Bank Transfer Reference.</span>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1rem;">
+            <div class="form-group">
+              <label class="form-label">Sender Phone / Name (Optional)</label>
+              <input type="text" id="dep-sender" class="form-input" placeholder="e.g. 0312-3456789 or Muhammad Ali">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Attach Proof Screenshot (Optional)</label>
+              <input type="file" id="dep-file" class="form-input" style="padding-top:10px;">
+            </div>
+          </div>
+
+          <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:1.2rem;">
+            <button type="submit" class="btn btn-primary btn-lg" style="flex:1;">
+              🚀 Submit Deposit Request
+            </button>
+            <button type="button" class="btn btn-cyan btn-lg" onclick="handleInstantDemoDeposit()" title="Immediately approves and adds balance for testing">
+              ⚡ Instant Test Deposit (Auto-Credit)
+            </button>
+          </div>
+        </form>
+
+      </div>
+
+      <!-- Tab 2: Deposit History Body -->
+      <div class="payment-body" id="pay-panel-history" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+          <h2 style="font-size: 1.3rem; font-weight: 800;">My Recharge History</h2>
+          <button class="btn btn-sm btn-ghost" onclick="loadMyDeposits()">🔄 Refresh</button>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Method</th>
+                <th>PKR Amount</th>
+                <th>USD Amount</th>
+                <th>Transaction ID</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="deposits-table-body">
+              <tr>
+                <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                  Loading deposit records...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-bottom">
+      <p><span class="site-brand-name">SMSPulse</span> Platform © 2026. Automated Wallet Top-Up System.</p>
+      <div style="display:flex; gap:16px;">
+        <a href="/" style="color:var(--primary); font-weight:600;">← Back to Virtual Numbers Store</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+  <script>
+    let paymentMethods = [];
+    let selectedMethod = null;
+
+    function switchPayTab(tab) {
+      document.getElementById('tab-btn-recharge').classList.toggle('active', tab === 'recharge');
+      document.getElementById('tab-btn-history').classList.toggle('active', tab === 'history');
+      document.getElementById('pay-panel-recharge').style.display = tab === 'recharge' ? 'block' : 'none';
+      document.getElementById('pay-panel-history').style.display = tab === 'history' ? 'block' : 'none';
+
+      if (tab === 'history') {
+        loadMyDeposits();
+      }
+    }
+
+    function syncPkrFromUsd(usd) {
+      const pkr = Math.round(Number(usd) * 280);
+      document.getElementById('dep-amount-pkr').value = pkr;
+    }
+
+    function syncUsdFromPkr(pkr) {
+      const usd = +(Number(pkr) / 280).toFixed(2);
+      document.getElementById('dep-amount-usd').value = usd;
+    }
+
+    function setQuickAmount(usd) {
+      document.querySelectorAll('.quick-amt-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('dep-amount-usd').value = Number(usd).toFixed(2);
+      syncPkrFromUsd(usd);
+    }
+
+    async function loadPaymentMethods() {
+      try {
+        const res = await fetch('/api/payments/methods');
+        const data = await res.json();
+        if (data.success) {
+          paymentMethods = data.methods;
+          renderPaymentMethods();
+          if (paymentMethods.length > 0) {
+            selectPaymentMethod(paymentMethods[0].id);
+          }
+        }
+      } catch (e) {
+        console.error('Error fetching payment methods:', e);
+      }
+    }
+
+    let activePayCategory = 'all';
+
+    function filterPaymentCategory(cat, btn) {
+      activePayCategory = cat;
+      document.querySelectorAll('.pay-cat-btn').forEach(b => b.classList.remove('active', 'btn-primary'));
+      if (btn) {
+        btn.classList.add('active', 'btn-primary');
+      }
+      renderPaymentMethods();
+    }
+
+    function renderPaymentMethods() {
+      const container = document.getElementById('methods-grid');
+      if (!container) return;
+
+      let list = paymentMethods;
+      if (activePayCategory === 'stable') {
+        list = paymentMethods.filter(m => m.id.includes('usdt') || m.id === 'binance_pay');
+      } else if (activePayCategory === 'crypto') {
+        list = paymentMethods.filter(m => m.category === 'crypto' && !m.id.includes('usdt') && m.id !== 'binance_pay');
+      } else if (activePayCategory === 'bank') {
+        list = paymentMethods.filter(m => m.category === 'bank');
+      }
+
+      container.innerHTML = list.map(m => `
+        <div class="pay-method-card ${selectedMethod && selectedMethod.id === m.id ? 'selected' : ''}" onclick="selectPaymentMethod('${m.id}')" style="cursor:pointer;">
+          <div class="method-icon-title">
+            <div class="method-icon" style="font-size:1.5rem; width:42px; height:42px; display:flex; align-items:center; justify-content:center; background:var(--bg-card-alt); border-radius:12px;">
+              ${m.icon || '🪙'}
+            </div>
+            <div>
+              <span class="method-name" style="font-weight:700; font-size:0.95rem; display:block;">${m.name}</span>
+              <span class="method-badge ${m.category === 'bank' ? 'badge-local' : 'badge-crypto'}" style="font-size:0.72rem;">${m.badge}</span>
+            </div>
+          </div>
+          <div style="font-size:0.78rem; color:var(--text-muted); display:flex; justify-content:space-between; margin-top:8px; border-top:1px solid var(--border-color); padding-top:6px;">
+            <span>Min: $${m.minDepositUsd}</span>
+            <span style="color:var(--brand-emerald); font-weight:700;">Fee: ${m.fee}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectPaymentMethod(id) {
+      selectedMethod = paymentMethods.find(m => m.id === id);
+      renderPaymentMethods();
+
+      if (!selectedMethod) return;
+
+      document.getElementById('active-method-name').innerText = selectedMethod.name;
+      document.getElementById('active-method-icon').innerText = selectedMethod.icon || '🪙';
+      document.getElementById('active-method-badge').innerText = selectedMethod.badge;
+
+      const titleLabel = document.getElementById('cred-title-label');
+      const titleVal = document.getElementById('cred-title-value');
+      const numLabel = document.getElementById('cred-number-label');
+      const numVal = document.getElementById('cred-number-value');
+      const copyBtn = document.getElementById('btn-copy-acc');
+
+      if (selectedMethod.category === 'bank') {
+        titleLabel.innerText = 'Bank Name & Account Title:';
+        titleVal.innerText = `${selectedMethod.bankName} - ${selectedMethod.accountTitle}`;
+        numLabel.innerText = 'Account / IBAN Number:';
+        numVal.innerText = selectedMethod.iban || selectedMethod.accountNumber;
+        if (copyBtn) copyBtn.innerHTML = '📋 Copy IBAN / Account Number';
+      } else if (selectedMethod.id === 'binance_pay') {
+        titleLabel.innerText = 'Account / Receiver:';
+        titleVal.innerText = (selectedMethod.accountTitle ? selectedMethod.accountTitle + ' ' : '') + '(Binance Pay)';
+        numLabel.innerText = 'Binance Pay ID:';
+        numVal.innerText = selectedMethod.address;
+        if (copyBtn) copyBtn.innerHTML = '📋 Copy Binance Pay ID';
+      } else {
+        // Crypto tokens
+        titleLabel.innerText = 'Blockchain Network:';
+        titleVal.innerText = selectedMethod.network;
+        numLabel.innerText = `${selectedMethod.symbol || 'Crypto'} Deposit Address:`;
+        numVal.innerText = selectedMethod.address;
+        if (copyBtn) copyBtn.innerHTML = `📋 Copy ${selectedMethod.symbol || ''} Address`;
+      }
+
+      document.getElementById('active-method-instructions').innerText = selectedMethod.instructions;
+    }
+
+    async function handleDepositSubmit(e) {
+      e.preventDefault();
+      await submitDeposit(false);
+    }
+
+    async function handleInstantDemoDeposit() {
+      const tidInput = document.getElementById('dep-tid');
+      if (!tidInput.value) {
+        tidInput.value = 'DEMO_TID_' + Math.floor(10000000 + Math.random() * 90000000);
+      }
+      await submitDeposit(true);
+    }
+
+    async function submitDeposit(autoApprove = false) {
+      if (!state.user) {
+        openLoginModal();
+        return;
+      }
+
+      const usd = parseFloat(document.getElementById('dep-amount-usd').value);
+      const pkr = parseInt(document.getElementById('dep-amount-pkr').value);
+      const tid = document.getElementById('dep-tid').value;
+      const sender = document.getElementById('dep-sender').value;
+
+      try {
+        const res = await fetch('/api/payments/deposit', {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({
+            method: selectedMethod ? selectedMethod.id : 'usdt_trc20',
+            amountUsd: usd,
+            amountPkr: pkr,
+            tid,
+            senderName: sender,
+            autoApprove
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          state.user.balanceUsd = data.newBalanceUsd;
+          state.user.balancePkr = data.newBalancePkr;
+          renderHeaderUser();
+          document.getElementById('dep-tid').value = '';
+          switchPayTab('history');
+        } else {
+          showToast(data.error || 'Deposit failed', 'error');
+        }
+      } catch (err) {
+        console.error(err);
+        showToast('Network error while submitting deposit', 'error');
+      }
+    }
+
+    async function loadMyDeposits() {
+      if (!state.user) return;
+
+      const tbody = document.getElementById('deposits-table-body');
+      try {
+        const res = await fetch('/api/payments/my', {
+          headers: getHeaders()
+        });
+        const data = await res.json();
+        if (data.success && data.deposits.length > 0) {
+          tbody.innerHTML = data.deposits.map(d => `
+            <tr>
+              <td>${new Date(d.createdAt).toLocaleString()}</td>
+              <td style="font-weight:700; text-transform:capitalize;">${d.method}</td>
+              <td style="color:var(--brand-emerald); font-weight:700;">₨ ${d.amountPkr.toLocaleString()}</td>
+              <td style="color:var(--primary); font-weight:700;">$${d.amountUsd.toFixed(2)}</td>
+              <td style="font-family:var(--font-mono); font-size:0.85rem;">${d.tid}</td>
+              <td>
+                <span class="status-pill status-${d.status.toLowerCase()}">${d.status}</span>
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                No deposit transactions yet. Use the "Recharge Balance" tab above to add funds.
+              </td>
+            </tr>
+          `;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPaymentMethods();
+    });
+  </script>
+</body>
+</html>

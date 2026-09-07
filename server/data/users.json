@@ -1,0 +1,171 @@
+[
+  {
+    "id": "usr_default_admin",
+    "name": "Super Admin",
+    "email": "admin@5sim.store",
+    "password": "admin",
+    "role": "admin",
+    "balanceUsd": 5,
+    "balancePkr": 1400,
+    "createdAt": "2026-09-06T06:13:22.959Z"
+  },
+  {
+    "id": "usr_demo_user",
+    "name": "Rizwan User",
+    "email": "user@example.com",
+    "password": "user123",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T06:13:22.960Z"
+  },
+  {
+    "id": "usr_g_1788690964391_w14ga",
+    "name": "Test Google User",
+    "email": "test.user.1788690964344@gmail.com",
+    "avatar": "https://lh3.googleusercontent.com/a/mock-photo",
+    "googleId": "gid_123456789",
+    "authProvider": "google",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T10:36:04.391Z"
+  },
+  {
+    "id": "usr_1788690964409_6pv1d",
+    "name": "Ahmad Khan",
+    "email": "user.1788690964406@example.com",
+    "password": "FinalBrandNewPassword!1",
+    "authProvider": "email",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T10:36:04.409Z"
+  },
+  {
+    "id": "usr_g_1788691868214_egru0",
+    "name": "Test Google User",
+    "email": "test.user.1788691868181@gmail.com",
+    "avatar": "https://lh3.googleusercontent.com/a/mock-photo",
+    "googleId": "gid_123456789",
+    "authProvider": "google",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T10:51:08.215Z"
+  },
+  {
+    "id": "usr_1788691868231_g7e0f",
+    "name": "Ahmad Khan",
+    "email": "user.1788691868229@example.com",
+    "password": "FinalBrandNewPassword!1",
+    "authProvider": "email",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T10:51:08.231Z"
+  },
+  {
+    "id": "usr_g_1788692102901_sld9k",
+    "name": "User Smspulse",
+    "email": "user.smspulse@gmail.com",
+    "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=user.smspulse%40gmail.com",
+    "googleId": "g_kwjobstw",
+    "authProvider": "google",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T10:55:02.901Z"
+  },
+  {
+    "id": "usr_1788692188913_7smd8",
+    "name": "rizwan",
+    "email": "yepoxo6686@liondapt.com",
+    "password": "1234567890",
+    "authProvider": "email",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T10:56:28.913Z",
+    "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Yepoxo6686",
+    "googleId": "gid_1788697384043"
+  },
+  {
+    "id": "usr_1788692749698_el3hw",
+    "name": "Farhan Ali",
+    "email": "farhan.1788692749594@gmail.com",
+    "password": "SecurePassword@123",
+    "authProvider": "email_verified",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T11:05:49.698Z"
+  },
+  {
+    "id": "usr_1788693220302_dxcny",
+    "name": "fahad",
+    "email": "rishkdsnklna@gmail.com",
+    "password": "e2323QWQES",
+    "authProvider": "email_verified",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T11:13:40.302Z"
+  },
+  {
+    "id": "usr_1788694807098_5y9qx",
+    "name": "Rizwan Test",
+    "email": "rizwan.test.1788694807027@gmail.com",
+    "password": "SuperSecretPassword@123",
+    "authProvider": "email_verified",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T11:40:07.098Z"
+  },
+  {
+    "id": "usr_g_1788696968429_y20jk",
+    "name": "Rizwan Saeed",
+    "email": "rizwansaeed2980@gmail.com",
+    "avatar": "https://api.dicebear.com/7.x/initials/svg?seed=Rizwan+Saeed",
+    "googleId": "gid_1788696968410",
+    "authProvider": "google",
+    "role": "admin",
+    "balanceUsd": 2,
+    "balancePkr": 560,
+    "createdAt": "2026-09-06T12:16:08.429Z"
+  },
+  {
+    "id": "usr_1788699966501_9825i",
+    "name": "Rizwan Saeed Permanent",
+    "email": "customer.1788699966357@gmail.com",
+    "password": "Password@786",
+    "authProvider": "email",
+    "role": "user",
+    "balanceUsd": 10,
+    "balancePkr": 2800,
+    "createdAt": "2026-09-06T13:06:06.501Z"
+  },
+  {
+    "id": "usr_1788700553704_9o5ro",
+    "name": "Zero User",
+    "email": "zero.user.1788700553615@gmail.com",
+    "password": "Password@123",
+    "authProvider": "email",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T13:15:53.704Z"
+  },
+  {
+    "id": "usr_1788717365051_sma1d",
+    "name": "Test Customer",
+    "email": "verify_1788717364819@gmail.com",
+    "password": "Password123!",
+    "authProvider": "email",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-06T17:56:05.051Z"
+  }
+]

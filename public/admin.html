@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — SMSPulse Console</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230284c7%22/><path d=%22M25 50h12l8-18 10 36 8-18h12%22 fill=%22none%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="site-header">
+    <div class="header-top">
+      <div class="header-brand" onclick="window.location.href='/'">
+        <div class="brand-pulse-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div class="brand-title-group">
+          <h1 class="site-brand-name">SMSPulse</h1>
+          <span>Admin Control Console</span>
+        </div>
+      </div>
+
+      <nav class="header-nav">
+        <a href="/" class="nav-link">Main Store</a>
+        <a href="/payment" class="nav-link">Payment Page</a>
+        <a href="/admin" class="nav-link active">Admin Panel</a>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-icon btn-ghost btn-toggle-theme" onclick="toggleTheme()">🌙</button>
+        <div id="header-user-area"></div>
+      </div>
+    </div>
+  </header>
+
+  <div style="max-width: 1400px; margin: 2rem auto 4rem; padding: 0 1.5rem; width:100%;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+      <div>
+        <h2 style="font-size: 1.5rem; font-weight: 800;">⚙️ Reseller Admin Console</h2>
+        <p style="color:var(--text-muted); font-size:0.9rem;">Approve customer deposits, configure profit margins, and manage brand settings.</p>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-primary btn-sm" onclick="loadAdminData()">🔄 Refresh Data</button>
+        <button class="btn btn-cyan btn-sm" onclick="loginAsAdmin()">🔑 Quick Admin Login</button>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:2rem;">
+      <div style="background:var(--bg-card); padding:1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); box-shadow:var(--shadow-subtle);">
+        <span style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Pending Deposits</span>
+        <h3 id="stat-pending-deposits" style="font-size:1.8rem; font-weight:800; color:var(--brand-amber); margin-top:4px;">0</h3>
+      </div>
+      <div style="background:var(--bg-card); padding:1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); box-shadow:var(--shadow-subtle);">
+        <span style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Approved Volume</span>
+        <h3 id="stat-approved-usd" style="font-size:1.8rem; font-weight:800; color:var(--brand-emerald); margin-top:4px;">$0.00</h3>
+      </div>
+      <div style="background:var(--bg-card); padding:1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); box-shadow:var(--shadow-subtle);">
+        <span style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Registered Customers</span>
+        <h3 id="stat-users-count" style="font-size:1.8rem; font-weight:800; color:var(--primary); margin-top:4px;">0</h3>
+      </div>
+      <div style="background:var(--bg-card); padding:1.25rem; border-radius:var(--radius-lg); border:1px solid var(--border-color); box-shadow:var(--shadow-subtle);">
+        <span style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">Profit Margin Markup</span>
+        <h3 id="stat-profit-margin" style="font-size:1.8rem; font-weight:800; color:var(--text-main); margin-top:4px;">20%</h3>
+      </div>
+    </div>
+
+    <!-- Main Grid: Deposits Table & Settings Form -->
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.75rem;">
+
+      <!-- Left Column: Pending & All Customer Deposits -->
+      <div style="background:var(--bg-card); border-radius:var(--radius-xl); border:1px solid var(--border-color); padding:1.5rem; overflow:hidden; box-shadow:var(--shadow-card);">
+        <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:1rem;">Customer Deposit Approvals</h3>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Method</th>
+                <th>Amount (PKR / USD)</th>
+                <th>TID / Reference</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-deposits-tbody">
+              <tr>
+                <td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">
+                  Loading deposit requests...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Right Column: Reseller Settings Form -->
+      <div style="background:var(--bg-card); border-radius:var(--radius-xl); border:1px solid var(--border-color); padding:1.5rem; height:fit-content; box-shadow:var(--shadow-card);">
+        <h3 style="font-size:1.2rem; font-weight:800; margin-bottom:1rem;">⚙️ Platform Customization</h3>
+
+        <form onsubmit="handleSettingsSave(event)">
+          <div class="form-group">
+            <label class="form-label">Brand / Platform Name</label>
+            <input type="text" id="set-brand-name" class="form-input" value="SMSPulse" required>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Customize your website name anytime!</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Profit Margin Markup (%)</label>
+            <input type="number" id="set-margin" class="form-input" min="0" max="500" value="20" required>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Markup added to wholesale base numbers cost.</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">USD to PKR Exchange Rate</label>
+            <input type="number" id="set-rate" class="form-input" value="280" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Binance Pay ID (Zero Fee)</label>
+            <input type="text" id="set-binance-pay" class="form-input" value="58677217" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Binance Pay Nickname / Title</label>
+            <input type="text" id="set-binance-title" class="form-input" value="Rizwan009">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">USDT TRC-20 Wallet Address</label>
+            <input type="text" id="set-usdt-addr" class="form-input" value="TSwa6EWKgnz2zmkCYqRhLxHysufH9sumEY" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">USDT (BEP-20) / BSC Address</label>
+            <input type="text" id="set-bep20-addr" class="form-input" value="0xe9313ff6d8e69ce1e7d2f07c55bac432e91543e1" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tron (TRX) TRC-20 Address</label>
+            <input type="text" id="set-trx-addr" class="form-input" value="TSwa6EWKgnz2zmkCYqRhLxHysufH9sumEY">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Solana (SOL) Address</label>
+            <input type="text" id="set-sol-addr" class="form-input" value="5KGxjDh7JgT6A7Lusz8n4L7qiG4B1S8jRnpuCzwJfTYw">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Dogecoin (DOGE) Address</label>
+            <input type="text" id="set-doge-addr" class="form-input" value="DTsHVEfzXozEAvRvQDWDrSTUqR9wJzz7Vy">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Bank Name & Title (PKR)</label>
+            <input type="text" id="set-bank-title" class="form-input" value="MCB Bank Ltd - Muhammad Rizwan Saeed">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bank IBAN / Account Number</label>
+            <input type="text" id="set-bank-iban" class="form-input" value="1156509301002436">
+          </div>
+
+          <div class="form-group">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label class="form-label" style="margin-bottom:0;">5SIM Wholesale API Token</label>
+              <span id="api-status-badge" style="color:var(--brand-emerald); font-size:0.75rem; font-weight:700; background:rgba(16,185,129,0.12); padding:2px 8px; border-radius:12px;">✅ Connected & Active</span>
+            </div>
+            <input type="password" id="set-api-token" class="form-input" style="margin-top:6px;" placeholder="Your 5SIM API token">
+            <span style="font-size:0.75rem; color:var(--text-muted);">Aapka live token already backend mein active hai. Agar future mein change karna ho to yahan naya token daalein.</span>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%; height:46px; margin-top:8px;">
+            💾 Save Settings
+          </button>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    async function loginAsAdmin() {
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: 'admin@5sim.store', password: 'admin' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          state.user = data.user;
+          localStorage.setItem('smspulse_userId', data.user.id);
+          renderHeaderUser();
+          showToast('Signed in as Super Admin!', 'success');
+          loadAdminData();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function loadAdminData() {
+      if (!state.user || state.user.role !== 'admin') {
+        await loginAsAdmin();
+      }
+
+      try {
+        const [resD, resU, resS] = await Promise.all([
+          fetch('/api/admin/deposits', { headers: getHeaders() }),
+          fetch('/api/admin/users', { headers: getHeaders() }),
+          fetch('/api/admin/settings', { headers: getHeaders() })
+        ]);
+
+        const dataD = await resD.json();
+        const dataU = await resU.json();
+        const dataS = await resS.json();
+
+        if (dataS.success) {
+          const s = dataS.settings;
+          if (document.getElementById('set-brand-name')) document.getElementById('set-brand-name').value = s.siteName || 'SMSPulse';
+          if (document.getElementById('set-margin')) document.getElementById('set-margin').value = s.profitMarginPercent;
+          if (document.getElementById('set-rate')) document.getElementById('set-rate').value = s.exchangeRate;
+          if (document.getElementById('set-binance-pay')) document.getElementById('set-binance-pay').value = s.binancePay?.binancePayId || '58677217';
+          if (document.getElementById('set-binance-title')) document.getElementById('set-binance-title').value = s.binancePay?.accountTitle || 'Rizwan009';
+          if (document.getElementById('set-usdt-addr')) document.getElementById('set-usdt-addr').value = s.cryptoUsdt?.address || 'TSwa6EWKgnz2zmkCYqRhLxHysufH9sumEY';
+          if (document.getElementById('set-bep20-addr')) document.getElementById('set-bep20-addr').value = s.cryptoBep20?.address || '0xe9313ff6d8e69ce1e7d2f07c55bac432e91543e1';
+          if (document.getElementById('set-trx-addr')) document.getElementById('set-trx-addr').value = s.cryptoTrx?.address || 'TSwa6EWKgnz2zmkCYqRhLxHysufH9sumEY';
+          if (document.getElementById('set-sol-addr')) document.getElementById('set-sol-addr').value = s.cryptoSol?.address || '5KGxjDh7JgT6A7Lusz8n4L7qiG4B1S8jRnpuCzwJfTYw';
+          if (document.getElementById('set-doge-addr')) document.getElementById('set-doge-addr').value = s.cryptoDoge?.address || 'DTsHVEfzXozEAvRvQDWDrSTUqR9wJzz7Vy';
+          if (document.getElementById('set-bank-title')) document.getElementById('set-bank-title').value = (s.bankTransfer?.bankName || 'MCB Bank Ltd') + ' - ' + (s.bankTransfer?.accountTitle || 'Muhammad Rizwan Saeed');
+          if (document.getElementById('set-bank-iban')) document.getElementById('set-bank-iban').value = s.bankTransfer?.iban || s.bankTransfer?.accountNumber || '1156509301002436';
+          if (document.getElementById('set-api-token') && s.apiToken5sim) document.getElementById('set-api-token').value = s.apiToken5sim;
+          document.getElementById('stat-profit-margin').innerText = `${s.profitMarginPercent}%`;
+        }
+
+        if (dataU.success) {
+          document.getElementById('stat-users-count').innerText = dataU.users.length;
+        }
+
+        if (dataD.success) {
+          const pending = dataD.deposits.filter(d => d.status === 'PENDING').length;
+          const approvedSum = dataD.deposits.filter(d => d.status === 'APPROVED').reduce((a, b) => a + b.amountUsd, 0);
+
+          document.getElementById('stat-pending-deposits').innerText = pending;
+          document.getElementById('stat-approved-usd').innerText = `$${approvedSum.toFixed(2)}`;
+
+          renderDepositsTable(dataD.deposits);
+        }
+      } catch (err) {
+        console.error('Error loading admin data:', err);
+      }
+    }
+
+    function renderDepositsTable(deposits) {
+      const tbody = document.getElementById('admin-deposits-tbody');
+      if (!tbody) return;
+
+      if (deposits.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted);">No deposits yet</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = deposits.map(d => `
+        <tr>
+          <td>
+            <strong>${d.userName}</strong>
+            <span style="display:block; font-size:0.75rem; color:var(--text-muted);">${d.userEmail || ''}</span>
+          </td>
+          <td style="font-weight:700; text-transform:capitalize;">${d.method}</td>
+          <td>
+            <strong style="color:var(--brand-emerald);">₨ ${d.amountPkr.toLocaleString()}</strong>
+            <span style="display:block; font-size:0.75rem; color:var(--text-muted);">$${d.amountUsd.toFixed(2)} USD</span>
+          </td>
+          <td style="font-family:var(--font-mono); font-size:0.85rem;">
+            ${d.tid}
+            ${d.senderName ? `<span style="display:block; font-size:0.75rem; color:var(--text-muted);">${d.senderName} (${d.senderNumber || ''})</span>` : ''}
+          </td>
+          <td>
+            <span class="status-pill status-${d.status.toLowerCase()}">${d.status}</span>
+          </td>
+          <td>
+            ${d.status === 'PENDING' ? `
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn-sm btn-success" onclick="approveDeposit('${d.id}')">✓ Approve</button>
+                <button class="btn btn-sm btn-danger" onclick="rejectDeposit('${d.id}')">✕ Reject</button>
+              </div>
+            ` : `<span style="color:var(--text-muted); font-size:0.8rem;">Processed</span>`}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function approveDeposit(id) {
+      try {
+        const res = await fetch(`/api/admin/deposits/${id}/approve`, {
+          method: 'POST',
+          headers: getHeaders()
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Deposit approved and customer balance credited!', 'success');
+          loadAdminData();
+        } else {
+          showToast(data.error || 'Failed to approve', 'error');
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function rejectDeposit(id) {
+      if (!confirm('Reject this deposit request?')) return;
+      try {
+        const res = await fetch(`/api/admin/deposits/${id}/reject`, {
+          method: 'POST',
+          headers: getHeaders()
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Deposit rejected', 'info');
+          loadAdminData();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function handleSettingsSave(e) {
+      e.preventDefault();
+      const siteName = document.getElementById('set-brand-name').value;
+      const margin = parseFloat(document.getElementById('set-margin').value);
+      const rate = parseFloat(document.getElementById('set-rate').value);
+      const binancePayId = document.getElementById('set-binance-pay')?.value.trim() || '58677217';
+      const binanceTitle = document.getElementById('set-binance-title')?.value.trim() || 'Rizwan009';
+      const usdtAddr = document.getElementById('set-usdt-addr')?.value.trim() || 'TSwa6EWKgnz2zmkCYqRhLxHysufH9sumEY';
+      const bep20Addr = document.getElementById('set-bep20-addr')?.value.trim() || '0xe9313ff6d8e69ce1e7d2f07c55bac432e91543e1';
+      const trxAddr = document.getElementById('set-trx-addr')?.value.trim() || 'TSwa6EWKgnz2zmkCYqRhLxHysufH9sumEY';
+      const solAddr = document.getElementById('set-sol-addr')?.value.trim() || '5KGxjDh7JgT6A7Lusz8n4L7qiG4B1S8jRnpuCzwJfTYw';
+      const dogeAddr = document.getElementById('set-doge-addr')?.value.trim() || 'DTsHVEfzXozEAvRvQDWDrSTUqR9wJzz7Vy';
+      const bankFullTitle = document.getElementById('set-bank-title')?.value.trim() || 'MCB Bank Ltd - Muhammad Rizwan Saeed';
+      const bankIban = document.getElementById('set-bank-iban')?.value.trim() || '1156509301002436';
+      const token = document.getElementById('set-api-token')?.value.trim();
+
+      const bankParts = bankFullTitle.split('-');
+      const bName = bankParts.length > 1 ? bankParts[0].trim() : 'MCB Bank Ltd';
+      const bTitle = bankParts.length > 1 ? bankParts.slice(1).join('-').trim() : bankFullTitle;
+
+      const payload = {
+        siteName,
+        profitMarginPercent: margin,
+        exchangeRate: rate,
+        binancePay: { binancePayId, accountTitle: binanceTitle },
+        cryptoUsdt: { address: usdtAddr, binancePayId, binancePayName: binanceTitle, network: 'TRC20' },
+        cryptoBep20: { address: bep20Addr, network: 'BEP20' },
+        cryptoTrx: { address: trxAddr, network: 'TRC20' },
+        cryptoSol: { address: solAddr, network: 'Solana' },
+        cryptoDoge: { address: dogeAddr, network: 'Dogecoin' },
+        bankTransfer: { bankName: bName, accountTitle: bTitle, accountNumber: bankIban, iban: bankIban }
+      };
+
+      if (token) {
+        payload.apiToken5sim = token;
+      }
+
+      try {
+        const res = await fetch('/api/admin/settings', {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Platform Settings saved successfully!', 'success');
+          loadAdminData();
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAdminData();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "siteName": "SMSPulse",
+  "tagline": "Global Virtual Numbers & Instant SMS Verification",
+  "exchangeRate": 280,
+  "profitMarginPercent": 20,
+  "apiToken5sim": "eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE4MjAyNDc2MjUsImlhdCI6MTc4ODcxMTYyNSwicmF5IjoiNzVkNjhmNThmNTRhODQ1MDA0NzZhY2UxNjk0YjFkNDkiLCJzdWIiOjQzNTM5MTh9.KMQqbxAOvoCKB6tw_cb-fjRWtutCR2pUfmK4KbcJo6B1HHtcrEQwx89pSHxxDBSg3w1DWTFg8gE5epSIJh-AyTbb-7xvGOKBYctcHySeIalV-zDiQzpwp3sMs2MwASeVaT-QvJ63ONunpMX_ZdM65PGQ4QTqBxYKsf7g4o7OGRzKqd8lL3Ed1y-i3FqXN7EbOiY1_8acsOi-qcEjDNvwCFPb_vp4-_dILeEX91NwYrBi0y14jbNZPcRexdcao4jKILB1-MdA9oFRUqpumhVN0CtHuoqjVwxXhkAwLs1ujMyqZYJqztxt7j3gwVmqspOjQv-LIfWYNH9rY4yOPRUQag",
+  "binancePay": {
+    "binancePayId": "58677217",
+    "accountTitle": "Rizwan009"
+  },
+  "cryptoUsdt": {
+    "address": "TSwa6EWKgnz2zmkCYqRhLxHysufH9sumEY",
+    "network": "TRC20",
+    "binancePayId": "58677217",
+    "binancePayName": "Rizwan009"
+  },
+  "cryptoBep20": {
+    "address": "0xe9313ff6d8e69ce1e7d2f07c55bac432e91543e1",
+    "network": "BEP20"
+  },
+  "cryptoSol": {
+    "address": "5KGxjDh7JgT6A7Lusz8n4L7qiG4B1S8jRnpuCzwJfTYw",
+    "network": "Solana"
+  },
+  "cryptoTrx": {
+    "address": "TSwa6EWKgnz2zmkCYqRhLxHysufH9sumEY",
+    "network": "TRC20"
+  },
+  "cryptoDoge": {
+    "address": "DTsHVEfzXozEAvRvQDWDrSTUqR9wJzz7Vy",
+    "network": "Dogecoin"
+  },
+  "bankTransfer": {
+    "bankName": "MCB Bank Ltd",
+    "accountTitle": "Muhammad Rizwan Saeed",
+    "accountNumber": "1156509301002436",
+    "iban": "1156509301002436"
+  },
+  "smtp": {
+    "service": "gmail",
+    "user": "",
+    "pass": "",
+    "from": "SMSPulse Security <noreply@smspulse.store>"
+  },
+  "googleClientId": ""
+}

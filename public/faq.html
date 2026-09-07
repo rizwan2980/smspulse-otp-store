@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frequently Asked Questions (FAQ) — SMSPulse</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230284c7%22/><path d=%22M25 50h12l8-18 10 36 8-18h12%22 fill=%22none%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-top">
+      <div class="header-brand" onclick="window.location.href='/'">
+        <div class="brand-pulse-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div class="brand-title-group">
+          <h1 class="site-brand-name">SMSPulse</h1>
+          <span>Virtual Numbers & OTP Service</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="/" class="nav-link">Home</a>
+        <a href="/payment" class="nav-link">Top Up / Payment</a>
+        <a href="/faq" class="nav-link active">FAQ</a>
+        <a href="/docs" class="nav-link">API Docs</a>
+        <a href="/admin" class="nav-link">Admin</a>
+      </nav>
+      <div class="header-actions">
+        <button class="btn btn-icon btn-ghost btn-toggle-theme" onclick="toggleTheme()">🌙</button>
+        <div id="header-user-area"></div>
+      </div>
+    </div>
+  </header>
+
+  <div style="max-width: 900px; margin: 3rem auto; padding: 0 1.5rem; flex: 1;">
+    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;">Frequently Asked Questions</h1>
+    <p style="color: var(--text-muted); margin-bottom: 2rem;">Everything you need to know about buying numbers, receiving SMS codes, and deposits.</p>
+
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+      <div style="background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">How long does it take to receive an SMS?</h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">SMS messages are received in real-time. Most codes arrive within 5 to 30 seconds after you request it from the respective app.</p>
+      </div>
+
+      <div style="background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">What happens if I don't receive an SMS code?</h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">You will NOT be charged! If no SMS arrives within the 15-minute countdown, or if you click "Cancel Order", the full cost is automatically and immediately refunded to your balance.</p>
+      </div>
+
+      <div style="background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">How do I deposit funds via Crypto (USDT, BTC, ETH, SOL, TON...) or Bank Transfer?</h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">Go to the <a href="/payment" style="color: var(--primary); font-weight: 700;">Top Up / Payment</a> page, select any of our 10+ supported Cryptocurrencies (USDT TRC-20, BEP-20, BTC, ETH, BNB, SOL, TON, LTC, DOGE, or Binance Pay ID) or Direct Bank Transfer. Copy the deposit address, send your transaction, and submit your TxID/Hash for instant credit.</p>
+      </div>
+
+      <div style="background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Can I use these numbers for WhatsApp and Telegram?</h3>
+        <p style="color: var(--text-muted); font-size: 0.92rem;">Yes! We provide fresh, non-recycled virtual numbers from UK, USA, Canada, Indonesia, Pakistan, and 150+ countries that work smoothly for WhatsApp, Telegram, Google, and all major platforms.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-bottom">
+      <p>5SIM SMS Verification Service © 2016-2026.</p>
+      <a href="/" style="color: var(--primary);">← Back to Home</a>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

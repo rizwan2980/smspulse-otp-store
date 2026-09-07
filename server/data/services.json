@@ -1,0 +1,186 @@
+[
+  {
+    "id": "whatsapp",
+    "name": "WhatsApp",
+    "icon": "whatsapp",
+    "priceUsd": 0.18,
+    "qty": 131405593,
+    "category": "Messengers"
+  },
+  {
+    "id": "telegram",
+    "name": "Telegram",
+    "icon": "telegram",
+    "priceUsd": 0.15,
+    "qty": 125103558,
+    "category": "Messengers"
+  },
+  {
+    "id": "google",
+    "name": "Google / YouTube",
+    "icon": "google",
+    "priceUsd": 0.12,
+    "qty": 157946152,
+    "category": "Tech"
+  },
+  {
+    "id": "openai",
+    "name": "OpenAI / ChatGPT",
+    "icon": "openai",
+    "priceUsd": 0.2,
+    "qty": 23121259,
+    "category": "AI Tools"
+  },
+  {
+    "id": "instagram",
+    "name": "Instagram / Threads",
+    "icon": "instagram",
+    "priceUsd": 0.1,
+    "qty": 93071282,
+    "category": "Social"
+  },
+  {
+    "id": "facebook",
+    "name": "Facebook",
+    "icon": "facebook",
+    "priceUsd": 0.08,
+    "qty": 33745649,
+    "category": "Social"
+  },
+  {
+    "id": "tiktok",
+    "name": "TikTok / Douyin",
+    "icon": "tiktok",
+    "priceUsd": 0.12,
+    "qty": 67104820,
+    "category": "Social"
+  },
+  {
+    "id": "amazon",
+    "name": "Amazon",
+    "icon": "amazon",
+    "priceUsd": 0.08,
+    "qty": 34442295,
+    "category": "Shopping"
+  },
+  {
+    "id": "microsoft",
+    "name": "Microsoft / Outlook",
+    "icon": "microsoft",
+    "priceUsd": 0.09,
+    "qty": 146354482,
+    "category": "Tech"
+  },
+  {
+    "id": "netflix",
+    "name": "Netflix",
+    "icon": "netflix",
+    "priceUsd": 0.25,
+    "qty": 18450120,
+    "category": "Streaming"
+  },
+  {
+    "id": "twitter",
+    "name": "Twitter / X",
+    "icon": "twitter",
+    "priceUsd": 0.14,
+    "qty": 45910230,
+    "category": "Social"
+  },
+  {
+    "id": "discord",
+    "name": "Discord",
+    "icon": "discord",
+    "priceUsd": 0.1,
+    "qty": 52190340,
+    "category": "Gaming"
+  },
+  {
+    "id": "steam",
+    "name": "Steam",
+    "icon": "steam",
+    "priceUsd": 0.12,
+    "qty": 29810450,
+    "category": "Gaming"
+  },
+  {
+    "id": "binance",
+    "name": "Binance",
+    "icon": "binance",
+    "priceUsd": 0.35,
+    "qty": 14209180,
+    "category": "Finance"
+  },
+  {
+    "id": "apple",
+    "name": "Apple ID / iCloud",
+    "icon": "apple",
+    "priceUsd": 0.22,
+    "qty": 84910834,
+    "category": "Tech"
+  },
+  {
+    "id": "paypal",
+    "name": "PayPal",
+    "icon": "paypal",
+    "priceUsd": 0.4,
+    "qty": 12401920,
+    "category": "Finance"
+  },
+  {
+    "id": "tinder",
+    "name": "Tinder",
+    "icon": "tinder",
+    "priceUsd": 0.28,
+    "qty": 19482100,
+    "category": "Dating"
+  },
+  {
+    "id": "uber",
+    "name": "Uber / UberEats",
+    "icon": "uber",
+    "priceUsd": 0.15,
+    "qty": 31020490,
+    "category": "Travel"
+  },
+  {
+    "id": "snapchat",
+    "name": "Snapchat",
+    "icon": "snapchat",
+    "priceUsd": 0.1,
+    "qty": 41829100,
+    "category": "Social"
+  },
+  {
+    "id": "spotify",
+    "name": "Spotify",
+    "icon": "spotify",
+    "priceUsd": 0.12,
+    "qty": 27192030,
+    "category": "Streaming"
+  },
+  {
+    "id": "dola",
+    "name": "Dola AI",
+    "icon": "dola",
+    "priceUsd": 0.15,
+    "qty": 8409200,
+    "category": "AI Tools"
+  },
+  {
+    "id": "claude",
+    "name": "Anthropic Claude",
+    "icon": "claude",
+    "priceUsd": 0.3,
+    "qty": 5491020,
+    "category": "AI Tools"
+  },
+  {
+    "id": "other",
+    "name": "Any Other (Service Not Listed)",
+    "icon": "other",
+    "priceUsd": 0.15,
+    "qty": 250000000,
+    "category": "General"
+  }
+]

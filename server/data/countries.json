@@ -1,0 +1,164 @@
+[
+  {
+    "id": "england",
+    "name": "England (UK)",
+    "code": "+44",
+    "iso": "gb",
+    "flag": "🇬🇧",
+    "baseCostMultiplier": 1,
+    "qty": 42091000
+  },
+  {
+    "id": "usa",
+    "name": "USA",
+    "code": "+1",
+    "iso": "us",
+    "flag": "🇺🇸",
+    "baseCostMultiplier": 1.2,
+    "qty": 95402000
+  },
+  {
+    "id": "canada",
+    "name": "Canada",
+    "code": "+1",
+    "iso": "ca",
+    "flag": "🇨🇦",
+    "baseCostMultiplier": 1.1,
+    "qty": 31209000
+  },
+  {
+    "id": "indonesia",
+    "name": "Indonesia",
+    "code": "+62",
+    "iso": "id",
+    "flag": "🇮🇩",
+    "baseCostMultiplier": 0.7,
+    "qty": 89401200
+  },
+  {
+    "id": "philippines",
+    "name": "Philippines",
+    "code": "+63",
+    "iso": "ph",
+    "flag": "🇵🇭",
+    "baseCostMultiplier": 0.8,
+    "qty": 45192000
+  },
+  {
+    "id": "pakistan",
+    "name": "Pakistan",
+    "code": "+92",
+    "iso": "pk",
+    "flag": "🇵🇰",
+    "baseCostMultiplier": 0.6,
+    "qty": 32091000
+  },
+  {
+    "id": "india",
+    "name": "India",
+    "code": "+91",
+    "iso": "in",
+    "flag": "🇮🇳",
+    "baseCostMultiplier": 0.7,
+    "qty": 110492000
+  },
+  {
+    "id": "cambodia",
+    "name": "Cambodia",
+    "code": "+855",
+    "iso": "kh",
+    "flag": "🇰🇭",
+    "baseCostMultiplier": 0.85,
+    "qty": 18402000
+  },
+  {
+    "id": "southafrica",
+    "name": "South Africa",
+    "code": "+27",
+    "iso": "za",
+    "flag": "🇿🇦",
+    "baseCostMultiplier": 0.9,
+    "qty": 22019400
+  },
+  {
+    "id": "germany",
+    "name": "Germany",
+    "code": "+49",
+    "iso": "de",
+    "flag": "🇩🇪",
+    "baseCostMultiplier": 1.4,
+    "qty": 14209300
+  },
+  {
+    "id": "france",
+    "name": "France",
+    "code": "+33",
+    "iso": "fr",
+    "flag": "🇫🇷",
+    "baseCostMultiplier": 1.35,
+    "qty": 16402100
+  },
+  {
+    "id": "brazil",
+    "name": "Brazil",
+    "code": "+55",
+    "iso": "br",
+    "flag": "🇧🇷",
+    "baseCostMultiplier": 0.85,
+    "qty": 58209100
+  },
+  {
+    "id": "netherlands",
+    "name": "Netherlands",
+    "code": "+31",
+    "iso": "nl",
+    "flag": "🇳🇱",
+    "baseCostMultiplier": 1.3,
+    "qty": 11209400
+  },
+  {
+    "id": "turkey",
+    "name": "Turkey",
+    "code": "+90",
+    "iso": "tr",
+    "flag": "🇹🇷",
+    "baseCostMultiplier": 0.9,
+    "qty": 34102900
+  },
+  {
+    "id": "nigeria",
+    "name": "Nigeria",
+    "code": "+234",
+    "iso": "ng",
+    "flag": "🇳🇬",
+    "baseCostMultiplier": 0.65,
+    "qty": 41209000
+  },
+  {
+    "id": "kazakhstan",
+    "name": "Kazakhstan",
+    "code": "+7",
+    "iso": "kz",
+    "flag": "🇰🇿",
+    "baseCostMultiplier": 0.75,
+    "qty": 28401900
+  },
+  {
+    "id": "vietnam",
+    "name": "Vietnam",
+    "code": "+84",
+    "iso": "vn",
+    "flag": "🇻🇳",
+    "baseCostMultiplier": 0.8,
+    "qty": 37409100
+  },
+  {
+    "id": "colombia",
+    "name": "Colombia",
+    "code": "+57",
+    "iso": "co",
+    "flag": "🇨🇴",
+    "baseCostMultiplier": 0.9,
+    "qty": 19201900
+  }
+]
