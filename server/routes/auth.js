@@ -1,14 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const { readData, writeData } = require('../db');
+const { sendVerificationEmail } = require('../services/mailer');
 
-// Helper: clean and normalize email
+// Verification codes cache: email -> { code, type, payload, expiresAt }
+const verificationCodes = new Map();
+
+function generatePin() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 function cleanEmail(email) {
   return (email || '').toLowerCase().trim();
 }
 
-// 1. Instant Permanent Registration (5SIM Standard - Fast, 0-Friction)
-router.post('/register', (req, res) => {
+// 1. Register with 6-Digit Email Verification Code
+router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
   const userEmail = cleanEmail(email);
 
@@ -27,34 +34,29 @@ router.post('/register', (req, res) => {
   }
 
   const cleanName = name && name.trim() ? name.trim() : userEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const pin = generatePin();
 
-  const newUser = {
-    id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-    name: cleanName,
-    email: userEmail,
-    password: password,
-    authProvider: 'email',
-    role: userEmail === 'rizwansaeed2980@gmail.com' ? 'admin' : 'user',
-    balanceUsd: 0.0, // Strictly $0.00 starting balance
-    balancePkr: 0.0,
-    createdAt: new Date().toISOString()
-  };
+  verificationCodes.set(userEmail, {
+    code: pin,
+    type: 'register',
+    payload: { name: cleanName, email: userEmail, password },
+    expiresAt: Date.now() + 10 * 60 * 1000
+  });
 
-  users.push(newUser);
-  writeData('users', users);
+  console.log(`[REGISTER OTP GENERATED] ${userEmail} -> Code: ${pin}`);
+  const mailResult = await sendVerificationEmail(userEmail, pin, 'Registration');
 
-  console.log(`[INSTANT REGISTER SUCCESS] ${newUser.name} (${newUser.email}) - Role: ${newUser.role}, Balance: $0.00`);
-
-  const { password: _, ...safeUser } = newUser;
   res.json({
     success: true,
-    user: safeUser,
-    message: `Welcome ${newUser.name}! Your account is active with $0.00 balance.`
+    requireOtp: true,
+    email: userEmail,
+    devCode: mailResult && mailResult.success ? null : pin,
+    message: `A 6-digit verification code has been issued for ${userEmail}.`
   });
 });
 
-// 2. Instant Standard Login
-router.post('/login', (req, res) => {
+// 2. Login with 6-Digit Security Code
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   const userEmail = cleanEmail(email);
 
@@ -71,18 +73,28 @@ router.post('/login', (req, res) => {
     return res.status(401).json({ error: 'Invalid email or password. Please try again.' });
   }
 
-  console.log(`[LOGIN SUCCESS] ${user.name} (${user.email}) - Role: ${user.role}`);
+  const pin = generatePin();
+  verificationCodes.set(userEmail, {
+    code: pin,
+    type: 'login',
+    payload: { userId: user.id },
+    expiresAt: Date.now() + 10 * 60 * 1000
+  });
 
-  const { password: _, ...safeUser } = user;
+  console.log(`[LOGIN OTP GENERATED] ${userEmail} -> Code: ${pin}`);
+  const mailResult = await sendVerificationEmail(userEmail, pin, 'Login Security');
+
   res.json({
     success: true,
-    user: safeUser,
-    message: `Welcome back, ${user.name}!`
+    requireOtp: true,
+    email: userEmail,
+    devCode: mailResult && mailResult.success ? null : pin,
+    message: `A 6-digit security code has been issued for ${userEmail}.`
   });
 });
 
-// 3. Instant Google Sign-In (Clean, 1-Click, No Leaked Admin Email)
-router.post('/google', (req, res) => {
+// 3. Google Sign-In with 6-Digit Verification Code
+router.post('/google', async (req, res) => {
   const { email, name, avatar, googleId } = req.body;
   const userEmail = cleanEmail(email);
 
@@ -90,87 +102,142 @@ router.post('/google', (req, res) => {
     return res.status(400).json({ error: 'Google email is required' });
   }
 
-  const users = readData('users');
-  let user = users.find(u => cleanEmail(u.email) === userEmail);
-  let isNew = false;
-
   const cleanName = name && name.trim() ? name.trim() : userEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const pin = generatePin();
 
-  if (user) {
-    user.authProvider = user.authProvider || 'google';
-    if (avatar && !user.avatar) user.avatar = avatar;
-    if (googleId && !user.googleId) user.googleId = googleId;
-    if (userEmail === 'rizwansaeed2980@gmail.com') user.role = 'admin';
-    writeData('users', users);
-  } else {
-    isNew = true;
-    user = {
-      id: 'usr_g_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
-      name: cleanName,
+  verificationCodes.set(userEmail, {
+    code: pin,
+    type: 'google',
+    payload: { email: userEmail, name: cleanName, avatar, googleId },
+    expiresAt: Date.now() + 10 * 60 * 1000
+  });
+
+  console.log(`[GOOGLE OTP GENERATED] ${userEmail} -> Code: ${pin}`);
+  const mailResult = await sendVerificationEmail(userEmail, pin, 'Google Verification');
+
+  res.json({
+    success: true,
+    requireOtp: true,
+    email: userEmail,
+    devCode: mailResult && mailResult.success ? null : pin,
+    message: `A 6-digit verification code has been issued for ${userEmail}.`
+  });
+});
+
+// 4. Universal 6-Digit Code Verification
+router.post('/verify-code', (req, res) => {
+  const { email, code } = req.body;
+  const userEmail = cleanEmail(email);
+
+  if (!userEmail || !code) {
+    return res.status(400).json({ error: 'Email and 6-digit verification code are required' });
+  }
+
+  const cached = verificationCodes.get(userEmail);
+  if (!cached) {
+    return res.status(400).json({ error: 'No active verification session. Please request a new code.' });
+  }
+
+  if (cached.code !== code.trim()) {
+    return res.status(400).json({ error: 'Invalid verification code. Please check your Gmail inbox and enter the 6-digit code.' });
+  }
+
+  if (Date.now() > cached.expiresAt) {
+    verificationCodes.delete(userEmail);
+    return res.status(400).json({ error: 'Verification code has expired. Please click Resend New Code.' });
+  }
+
+  const users = readData('users');
+
+  if (cached.type === 'register') {
+    const { name, password } = cached.payload;
+    const newUser = {
+      id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+      name: name,
       email: userEmail,
-      avatar: avatar || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(cleanName)),
-      googleId: googleId || ('gid_' + Date.now()),
-      authProvider: 'google',
+      password: password,
+      authProvider: 'email',
       role: userEmail === 'rizwansaeed2980@gmail.com' ? 'admin' : 'user',
-      balanceUsd: 0.0, // Strictly $0.00 starting balance
+      balanceUsd: 0.0,
       balancePkr: 0.0,
       createdAt: new Date().toISOString()
     };
-    users.push(user);
+    users.push(newUser);
     writeData('users', users);
+    verificationCodes.delete(userEmail);
+
+    const { password: _, ...safeUser } = newUser;
+    return res.json({
+      success: true,
+      user: safeUser,
+      message: `🎉 Welcome ${newUser.name}! Your account is active with $0.00 balance.`
+    });
   }
 
-  console.log(`[GOOGLE AUTH SUCCESS] ${user.name} (${user.email}) - Role: ${user.role}, IsNew: ${isNew}, Balance: $${user.balanceUsd}`);
+  if (cached.type === 'login') {
+    const user = users.find(u => u.id === cached.payload.userId || cleanEmail(u.email) === userEmail);
+    verificationCodes.delete(userEmail);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const { password: _, ...safeUser } = user;
+    return res.json({ success: true, user: safeUser, message: `Welcome back, ${user.name}!` });
+  }
 
-  const { password: _, ...safeUser } = user;
-  res.json({
-    success: true,
-    user: safeUser,
-    isNew,
-    message: isNew ? `Welcome ${user.name}! Your account is ready.` : `Welcome back, ${user.name}!`
-  });
+  if (cached.type === 'google') {
+    const { name, avatar, googleId } = cached.payload;
+    let user = users.find(u => cleanEmail(u.email) === userEmail);
+    let isNew = false;
+    if (user) {
+      if (userEmail === 'rizwansaeed2980@gmail.com') user.role = 'admin';
+      writeData('users', users);
+    } else {
+      isNew = true;
+      user = {
+        id: 'usr_g_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
+        name: name,
+        email: userEmail,
+        avatar: avatar || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(name)),
+        googleId: googleId || ('gid_' + Date.now()),
+        authProvider: 'google',
+        role: userEmail === 'rizwansaeed2980@gmail.com' ? 'admin' : 'user',
+        balanceUsd: 0.0,
+        balancePkr: 0.0,
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+      writeData('users', users);
+    }
+    verificationCodes.delete(userEmail);
+    const { password: _, ...safeUser } = user;
+    return res.json({ success: true, user: safeUser, isNew, message: isNew ? `Welcome ${user.name}!` : `Welcome back, ${user.name}!` });
+  }
+
+  res.status(400).json({ error: 'Unknown verification action' });
 });
 
-// 4. Password Reset - Step 1
-router.post('/forgot-password', (req, res) => {
+// 5. Resend Verification Code
+router.post('/resend-code', async (req, res) => {
   const { email } = req.body;
   const userEmail = cleanEmail(email);
-  if (!userEmail) return res.status(400).json({ error: 'Email address is required' });
+  if (!userEmail) return res.status(400).json({ error: 'Email is required' });
 
-  const users = readData('users');
-  const user = users.find(u => cleanEmail(u.email) === userEmail);
-  if (!user) {
-    return res.json({ success: true, message: 'If an account exists, a reset code has been issued.' });
+  const cached = verificationCodes.get(userEmail);
+  if (!cached) {
+    return res.status(400).json({ error: 'No active session found. Please try signing in again.' });
   }
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const newPin = generatePin();
+  cached.code = newPin;
+  cached.expiresAt = Date.now() + 10 * 60 * 1000;
+  verificationCodes.set(userEmail, cached);
+
+  console.log(`[OTP RESENT] ${userEmail} -> Code: ${newPin}`);
+  const mailResult = await sendVerificationEmail(userEmail, newPin, 'Verification Code');
+
   res.json({
     success: true,
-    message: `Password reset request received for ${userEmail}.`
+    devCode: mailResult && mailResult.success ? null : newPin,
+    message: `A new 6-digit verification code has been issued for ${userEmail}.`
   });
-});
-
-// 5. Change Password
-router.post('/change-password', (req, res) => {
-  const userId = req.headers['x-user-id'];
-  const { currentPassword, newPassword } = req.body;
-
-  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-  if (!newPassword || newPassword.length < 6) {
-    return res.status(400).json({ error: 'New password must be at least 6 characters' });
-  }
-
-  const users = readData('users');
-  const user = users.find(u => u.id === userId);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-
-  if (user.password && user.password !== currentPassword) {
-    return res.status(400).json({ error: 'Current password is incorrect' });
-  }
-
-  user.password = newPassword;
-  writeData('users', users);
-  res.json({ success: true, message: 'Password updated successfully' });
 });
 
 // 6. Get Profile

@@ -959,7 +959,7 @@ async function handleLoginSubmit(e) {
   const origText = submitBtn ? submitBtn.innerHTML : 'Sign In';
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = 'Verifying... ⏳';
+    submitBtn.innerHTML = 'Signing in... ⏳';
   }
 
   try {
@@ -976,12 +976,13 @@ async function handleLoginSubmit(e) {
       showToast(data.message || 'Security code issued. Please enter code to continue.', 'info');
     } else if (data.success) {
       state.user = data.user;
+      localStorage.setItem('smspulse_user', JSON.stringify(data.user));
       localStorage.setItem('smspulse_userId', data.user.id);
       closeLoginModal();
+      window.history.replaceState({}, document.title, window.location.pathname);
       renderHeaderUser();
       fetchMyOrders();
-      showToast(`Welcome back, ${data.user.name}!`, 'success');
-      setTimeout(() => window.location.reload(), 600);
+      showToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
     } else {
       showToast(data.error || 'Invalid email or password', 'error');
     }
@@ -1037,12 +1038,13 @@ async function handleRegisterSubmit(e) {
       showToast('Verification code issued. Please enter code to activate account.', 'info');
     } else if (data.success) {
       state.user = data.user;
-      localStorage.setItem('smspulse_user', JSON.stringify(data.user)); localStorage.setItem('smspulse_userId', data.user.id);
+      localStorage.setItem('smspulse_user', JSON.stringify(data.user));
+      localStorage.setItem("smspulse_userId", data.user.id);
       closeRegisterModal();
+      window.history.replaceState({}, document.title, window.location.pathname);
       renderHeaderUser();
       fetchMyOrders();
-      showToast(`🎉 Welcome ${data.user.name}! Your account has been created!`, "success");
-      setTimeout(() => window.location.reload(), 600);
+      showToast(data.message || `🎉 Welcome ${data.user.name}! Your account is active!`, "success");
     } else {
       showToast(data.error || "Registration failed", "error");
     }
@@ -1213,12 +1215,13 @@ async function handleGoogleSubmit(e) {
       showToast('Verification code issued. Please enter code to sign in.', 'info');
     } else if (data.success) {
       state.user = data.user;
+      localStorage.setItem('smspulse_user', JSON.stringify(data.user));
       localStorage.setItem('smspulse_userId', data.user.id);
       closeGoogleChooserModal();
+      window.history.replaceState({}, document.title, window.location.pathname);
       renderHeaderUser();
       fetchMyOrders();
-      showToast(`Welcome back, ${data.user.name}!`, 'success');
-      setTimeout(() => window.location.reload(), 600);
+      showToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
     } else {
       showToast(data.error || 'Google Sign-In failed', 'error');
     }
@@ -1228,7 +1231,7 @@ async function handleGoogleSubmit(e) {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = 'Continue with Google →';
+      btn.innerHTML = 'Send Verification Code →';
     }
   }
 }
@@ -1296,23 +1299,24 @@ async function handleOtpVerificationSubmit(e) {
         code: code
       })
     });
-
     const data = await res.json();
     if (data.success) {
       state.user = data.user;
+      localStorage.setItem('smspulse_user', JSON.stringify(data.user));
       localStorage.setItem('smspulse_userId', data.user.id);
       closeOtpModal();
+      closeRegisterModal();
+      closeLoginModal();
+      closeGoogleChooserModal();
+      window.history.replaceState({}, document.title, window.location.pathname);
       renderHeaderUser();
       fetchMyOrders();
-      showToast(`🎉 Welcome ${data.user.name}! Your account is active!`, 'success');
-      setTimeout(() => {
-        window.location.reload();
-      }, 600);
+      showToast(data.message || `🎉 Welcome ${data.user.name}!`, 'success');
     } else {
       showToast(data.error || 'Invalid verification code', 'error');
     }
   } catch (err) {
-    console.error('OTP verification error:', err);
+    console.error('OTP error:', err);
     showToast('Network error during verification', 'error');
   } finally {
     if (submitBtn) {
