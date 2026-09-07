@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { readData, writeData } = require('../db');
-const fivesim = require('../providers/fiveSim');
+const fivesim = require('../providers/fivesim');
 const pricingSync = require('../providers/pricingSync');
 
 // SMS Polling Helper
