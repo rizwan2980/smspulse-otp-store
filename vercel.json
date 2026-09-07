@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "cleanUrls": true,
   "functions": {
     "api/index.js": {
       "includeFiles": "server/**"
@@ -8,27 +9,23 @@
   "rewrites": [
     {
       "source": "/payment",
-      "destination": "/public/payment.html"
+      "destination": "/payment.html"
     },
     {
       "source": "/admin",
-      "destination": "/public/admin.html"
+      "destination": "/admin.html"
     },
     {
       "source": "/faq",
-      "destination": "/public/faq.html"
+      "destination": "/faq.html"
     },
     {
       "source": "/docs",
-      "destination": "/public/docs.html"
+      "destination": "/docs.html"
     },
     {
       "source": "/api/(.*)",
       "destination": "/api/index.js"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/public/$1"
     }
   ]
 }
