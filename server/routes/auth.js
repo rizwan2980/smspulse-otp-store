@@ -176,10 +176,27 @@ router.post('/change-password', (req, res) => {
 // 6. Get Profile
 router.get('/me', (req, res) => {
   const userId = req.headers['x-user-id'];
-  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const userEmail = cleanEmail(req.headers['x-user-email']);
+  if (!userId && !userEmail) return res.status(401).json({ error: 'Not authenticated' });
 
   const users = readData('users');
-  const user = users.find(u => u.id === userId);
+  let user = users.find(u => u.id === userId || (userEmail && cleanEmail(u.email) === userEmail));
+
+  if (!user && userEmail) {
+    user = {
+      id: userId || ('usr_' + Date.now()),
+      name: userEmail.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      email: userEmail,
+      authProvider: 'email',
+      role: userEmail === 'rizwansaeed2980@gmail.com' ? 'admin' : 'user',
+      balanceUsd: 0.0,
+      balancePkr: 0.0,
+      createdAt: new Date().toISOString()
+    };
+    users.push(user);
+    writeData('users', users);
+  }
+
   if (!user) return res.status(404).json({ error: 'User not found' });
 
   const { password: _, ...safeUser } = user;

@@ -140,24 +140,38 @@ function getHeaders() {
 
 // Fetch user profile or default demo
 async function initUser() {
-  const savedUserId = localStorage.getItem('smspulse_userId') || localStorage.getItem('smspulse_userId');
-  if (savedUserId) {
+  const savedUserStr = localStorage.getItem('smspulse_user');
+  if (savedUserStr) {
     try {
-      const res = await fetch('/api/auth/me', {
-        headers: { 'x-user-id': savedUserId }
-      });
-      const data = await res.json();
-      if (data.success) {
-        state.user = data.user;
-      }
+      state.user = JSON.parse(savedUserStr);
     } catch (e) {
-      console.error('Error fetching user:', e);
+      state.user = null;
     }
   }
 
-  // If no saved user, remain guest until user clicks Sign in / Register / Google
-
   renderHeaderUser();
+
+  const savedUserId = state.user ? state.user.id : localStorage.getItem('smspulse_userId');
+  const savedEmail = state.user ? state.user.email : '';
+  if (savedUserId || savedEmail) {
+    try {
+      const res = await fetch('/api/auth/me', {
+        headers: {
+          'x-user-id': savedUserId || '',
+          'x-user-email': savedEmail || ''
+        }
+      });
+      const data = await res.json();
+      if (data && data.success && data.user) {
+        state.user = data.user;
+        localStorage.setItem('smspulse_user', JSON.stringify(data.user));
+        localStorage.setItem('smspulse_user', JSON.stringify(data.user)); localStorage.setItem('smspulse_userId', data.user.id);
+        renderHeaderUser();
+      }
+    } catch (e) {
+      console.warn('Session background sync:', e);
+    }
+  }
 }
 
 // Render header wallet & actions
@@ -918,12 +932,13 @@ function closeProfileModal() {
 
 function logout() {
   state.user = null;
-  localStorage.removeItem('smspulse_userId');
+  localStorage.removeItem('smspulse_user');
   localStorage.removeItem('smspulse_userId');
   closeProfileModal();
   renderHeaderUser();
   renderLiveOrders();
   showToast('Logged out successfully', 'info');
+  window.history.replaceState({}, document.title, window.location.pathname);
 }
 
 // Handle login submit
@@ -1022,7 +1037,7 @@ async function handleRegisterSubmit(e) {
       showToast('Verification code issued. Please enter code to activate account.', 'info');
     } else if (data.success) {
       state.user = data.user;
-      localStorage.setItem("smspulse_userId", data.user.id);
+      localStorage.setItem('smspulse_user', JSON.stringify(data.user)); localStorage.setItem('smspulse_userId', data.user.id);
       closeRegisterModal();
       renderHeaderUser();
       fetchMyOrders();
