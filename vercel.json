@@ -3,23 +3,23 @@
   "rewrites": [
     {
       "source": "/payment",
-      "destination": "/payment.html"
+      "destination": "/public/payment.html"
     },
     {
       "source": "/admin",
-      "destination": "/admin.html"
+      "destination": "/public/admin.html"
     },
     {
       "source": "/faq",
-      "destination": "/faq.html"
+      "destination": "/public/faq.html"
     },
     {
       "source": "/docs",
-      "destination": "/docs.html"
+      "destination": "/public/docs.html"
     },
     {
       "source": "/api/(.*)",
-      "destination": "/server/server.js"
+      "destination": "/api/index.js"
     },
     {
       "source": "/(.*)",
