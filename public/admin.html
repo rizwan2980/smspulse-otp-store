@@ -167,11 +167,11 @@
 
           <div class="form-group">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <label class="form-label" style="margin-bottom:0;">5SIM Wholesale API Token</label>
+              <label class="form-label" style="margin-bottom:0;">Provider Wholesale API Token</label>
               <span id="api-status-badge" style="color:var(--brand-emerald); font-size:0.75rem; font-weight:700; background:rgba(16,185,129,0.12); padding:2px 8px; border-radius:12px;">✅ Connected & Active</span>
             </div>
             <input type="password" id="set-api-token" class="form-input" style="margin-top:6px;" placeholder="Your 5SIM API token">
-            <span style="font-size:0.75rem; color:var(--text-muted);">Aapka live token already backend mein active hai. Agar future mein change karna ho to yahan naya token daalein.</span>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Aapka provider API token backend mein active hai. Agar future mein change karna ho to yahan naya token daalein.</span>
           </div>
 
           <button type="submit" class="btn btn-primary" style="width:100%; height:46px; margin-top:8px;">
@@ -191,7 +191,7 @@
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: 'admin@5sim.store', password: 'admin' })
+          body: JSON.stringify({ email: 'admin@smspulse.store', password: 'admin' })
         });
         const data = await res.json();
         if (data.success) {

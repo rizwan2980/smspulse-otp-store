@@ -139,7 +139,7 @@ function getHeaders() {
 
 // Fetch user profile or default demo
 async function initUser() {
-  const savedUserId = localStorage.getItem('smspulse_userId') || localStorage.getItem('5sim_userId');
+  const savedUserId = localStorage.getItem('smspulse_userId') || localStorage.getItem('smspulse_userId');
   if (savedUserId) {
     try {
       const res = await fetch('/api/auth/me', {
@@ -395,7 +395,7 @@ async function updateStep3() {
   const opSelect = document.getElementById('step3-operator-select');
 
   if (priceElem) priceElem.innerText = 'Syncing...';
-  if (pkrSub) pkrSub.innerText = 'Fetching 5SIM live rates...';
+  if (pkrSub) pkrSub.innerText = 'Fetching live rates & stock...';
   if (stockBadge) {
     stockBadge.innerText = '● Checking stock...';
     stockBadge.style.color = 'var(--text-muted)';
@@ -481,7 +481,7 @@ function renderPriceForSelectedOperator() {
   if (buyBtn) {
     if (matched.count === 0 && matched.id !== 'any' && data.totalStock === 0) {
       buyBtn.disabled = true;
-      buyBtn.innerHTML = '⚠️ Currently Out of Stock on 5SIM';
+      buyBtn.innerHTML = '⚠️ Currently Out of Stock';
     } else {
       buyBtn.disabled = false;
       buyBtn.innerHTML = `⚡ Buy Virtual Number (${formatMoney(costUsd, costPkr)})`;
@@ -886,7 +886,7 @@ function closeProfileModal() {
 function logout() {
   state.user = null;
   localStorage.removeItem('smspulse_userId');
-  localStorage.removeItem('5sim_userId');
+  localStorage.removeItem('smspulse_userId');
   closeProfileModal();
   renderHeaderUser();
   renderLiveOrders();
@@ -1359,7 +1359,7 @@ async function update5simOperators() {
   listContainer.innerHTML = `
     <div style="padding: 1.25rem 0.5rem; text-align: center; color: var(--text-muted); font-size: 0.82rem;">
       <div class="radar-pulse-dot" style="margin: 0 auto 8px auto;"></div>
-      Fetching live 5SIM rates & operators for ${s.name} in ${c.name}...
+      Fetching live rates & operators for ${s.name} in ${c.name}...
     </div>
   `;
 
@@ -1433,7 +1433,7 @@ async function update5simOperators() {
       console.error('Error fetching live operators:', err);
       listContainer.innerHTML = `
         <div style="padding: 1rem; text-align: center; color: #ef4444; font-size: 0.82rem;">
-          Failed to load live 5SIM rates. Please try again.
+          Failed to load live rates. Please try again.
         </div>
       `;
     }
