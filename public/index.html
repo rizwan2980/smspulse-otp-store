@@ -6,7 +6,7 @@
   <title>SMSPulse — Global Virtual Numbers & Instant SMS Verification</title>
   <meta name="description" content="Get instant virtual phone numbers for online SMS verification. Bypass OTP on WhatsApp, Telegram, Google, OpenAI ChatGPT, TikTok, Amazon, and 1,100+ services.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230284c7%22/><path d=%22M25 50h12l8-18 10 36 8-18h12%22 fill=%22none%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
-  <link rel="stylesheet" href="/css/style.css?v=3.7">
+  <link rel="stylesheet" href="/css/style.css?v=3.9">
   <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -388,8 +388,7 @@
       <div class="footer-col">
         <h4>Management & Help</h4>
         <ul>
-          <li><a href="/admin">Admin Management Dashboard</a></li>
-          <li><a href="/faq">Support & Community</a></li>
+                    <li><a href="/faq">Support & Community</a></li>
           <li><a href="mailto:support@smspulse.store">support@smspulse.store</a></li>
         </ul>
       </div>
@@ -633,13 +632,13 @@
 
       <div style="display:flex; flex-direction:column; gap:10px;">
         <a href="/payment" class="btn btn-primary" style="width:100%;">Top Up Wallet (Deposit)</a>
-        <a href="/admin" class="btn btn-outline" style="width:100%;">Admin Dashboard</a>
+        <a href="/admin" id="prof-admin-btn" class="btn btn-outline" style="width:100%; display:none;">⚙️ Admin Dashboard</a>
         <button class="btn btn-danger" onclick="logout()" style="width:100%;">Logout</button>
       </div>
     </div>
   </div>
 
-  <script src="/js/app.js?v=3.7"></script>
+  <script src="/js/app.js?v=3.9"></script>
 
   <!-- Mobile Floating App Navigation Bar (Dedicated Mobile Mode) -->
   <nav class="mobile-bottom-nav">

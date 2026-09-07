@@ -140,25 +140,23 @@ function getHeaders() {
 
 // Fetch user profile or default demo
 async function initUser() {
-  const savedUserId = localStorage.getItem('smspulse_userId');
+  const savedUserId = localStorage.getItem('smspulse_userId') || localStorage.getItem('smspulse_userId');
   if (savedUserId) {
     try {
       const res = await fetch('/api/auth/me', {
         headers: { 'x-user-id': savedUserId }
       });
       const data = await res.json();
-      if (data && data.success && data.user) {
+      if (data.success) {
         state.user = data.user;
-      } else {
-        localStorage.removeItem('smspulse_userId');
-        state.user = null;
       }
     } catch (e) {
       console.error('Error fetching user:', e);
     }
-  } else {
-    state.user = null;
   }
+
+  // If no saved user, remain guest until user clicks Sign in / Register / Google
+
   renderHeaderUser();
 }
 
@@ -899,8 +897,16 @@ function openProfileModal() {
   if (modal && state.user) {
     document.getElementById('prof-name').innerText = state.user.name;
     document.getElementById('prof-email').innerText = state.user.email;
-    document.getElementById('prof-balance-usd').innerText = `$${state.user.balanceUsd.toFixed(2)}`;
-    document.getElementById('prof-balance-pkr').innerText = `₨ ${state.user.balancePkr.toLocaleString()}`;
+    document.getElementById('prof-balance-usd').innerText = '$' + (state.user.balanceUsd ? state.user.balanceUsd.toFixed(2) : '0.00');
+    document.getElementById('prof-balance-pkr').innerText = '₨ ' + (state.user.balancePkr ? state.user.balancePkr.toLocaleString() : '0');
+
+    // Strictly show Admin Dashboard button ONLY for rizwansaeed2980@gmail.com
+    const adminBtn = document.getElementById('prof-admin-btn');
+    if (adminBtn) {
+      const isAdmin = (state.user.role === 'admin' || state.user.email === 'rizwansaeed2980@gmail.com');
+      adminBtn.style.display = isAdmin ? 'block' : 'none';
+    }
+
     modal.classList.add('open');
   }
 }
@@ -938,7 +944,7 @@ async function handleLoginSubmit(e) {
   const origText = submitBtn ? submitBtn.innerHTML : 'Sign In';
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = 'Signing in... ⏳';
+    submitBtn.innerHTML = 'Verifying... ⏳';
   }
 
   try {
@@ -948,14 +954,18 @@ async function handleLoginSubmit(e) {
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
-    if (data.success) {
+    if (data.requireOtp) {
+      state.pendingAuth = { email: data.email, type: 'login' };
+      closeLoginModal();
+      openOtpModal(data.email, data.devCode, 'login');
+      showToast(data.message || 'Security code issued. Please enter code to continue.', 'info');
+    } else if (data.success) {
       state.user = data.user;
       localStorage.setItem('smspulse_userId', data.user.id);
       closeLoginModal();
-      window.history.replaceState({}, document.title, window.location.pathname);
       renderHeaderUser();
       fetchMyOrders();
-      showToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
+      showToast(`Welcome back, ${data.user.name}!`, 'success');
       setTimeout(() => window.location.reload(), 600);
     } else {
       showToast(data.error || 'Invalid email or password', 'error');
@@ -995,7 +1005,7 @@ async function handleRegisterSubmit(e) {
   const origText = submitBtn ? submitBtn.innerHTML : 'Create Account';
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = 'Creating Account... ⏳';
+    submitBtn.innerHTML = 'Sending Code... ⏳';
   }
 
   try {
@@ -1005,14 +1015,18 @@ async function handleRegisterSubmit(e) {
       body: JSON.stringify({ name: name || email.split('@')[0], email, password })
     });
     const data = await res.json();
-    if (data.success) {
+    if (data.requireOtp) {
+      state.pendingAuth = { email: data.email, type: 'register' };
+      closeRegisterModal();
+      openOtpModal(data.email, data.devCode, 'register');
+      showToast('Verification code issued. Please enter code to activate account.', 'info');
+    } else if (data.success) {
       state.user = data.user;
       localStorage.setItem("smspulse_userId", data.user.id);
       closeRegisterModal();
-      window.history.replaceState({}, document.title, window.location.pathname);
       renderHeaderUser();
       fetchMyOrders();
-      showToast(data.message || `🎉 Welcome ${data.user.name}! Your account is active!`, "success");
+      showToast(`🎉 Welcome ${data.user.name}! Your account has been created!`, "success");
       setTimeout(() => window.location.reload(), 600);
     } else {
       showToast(data.error || "Registration failed", "error");
@@ -1069,9 +1083,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (action) {
       window.history.replaceState({}, document.title, window.location.pathname);
       if (!state.user) {
-        if (action === 'login') setTimeout(openLoginModal, 200);
-        else if (action === 'register') setTimeout(openRegisterModal, 200);
-        else if (action === 'google') setTimeout(handleGoogleSignIn, 200);
+        if (action === 'login') setTimeout(openLoginModal, 250);
+        else if (action === 'register') setTimeout(openRegisterModal, 250);
+        else if (action === 'google') setTimeout(handleGoogleSignIn, 250);
       }
     }
   } catch (e) {}
@@ -1167,7 +1181,7 @@ async function handleGoogleSubmit(e) {
 
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = 'Signing in... ⏳';
+    btn.innerHTML = 'Sending Code... ⏳';
   }
 
   try {
@@ -1177,14 +1191,18 @@ async function handleGoogleSubmit(e) {
       body: JSON.stringify({ email, name, avatar, googleId: 'gid_' + Date.now() })
     });
     const data = await res.json();
-    if (data.success) {
+    if (data.requireOtp) {
+      state.pendingAuth = { email: data.email, type: 'google' };
+      closeGoogleChooserModal();
+      openOtpModal(data.email, data.devCode, 'google');
+      showToast('Verification code issued. Please enter code to sign in.', 'info');
+    } else if (data.success) {
       state.user = data.user;
       localStorage.setItem('smspulse_userId', data.user.id);
       closeGoogleChooserModal();
-      window.history.replaceState({}, document.title, window.location.pathname);
       renderHeaderUser();
       fetchMyOrders();
-      showToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
+      showToast(`Welcome back, ${data.user.name}!`, 'success');
       setTimeout(() => window.location.reload(), 600);
     } else {
       showToast(data.error || 'Google Sign-In failed', 'error');
@@ -1212,6 +1230,15 @@ function openOtpModal(email, devCode = null, targetType = 'auth') {
   if (input) {
     input.value = '';
     setTimeout(() => input.focus(), 200);
+  }
+
+  const banner = document.getElementById('otp-security-banner');
+  const codeEl = document.getElementById('otp-security-code');
+  if (devCode && banner && codeEl) {
+    codeEl.textContent = devCode;
+    banner.style.display = 'block';
+  } else if (banner) {
+    banner.style.display = 'none';
   }
 
   modal.classList.add('open');
@@ -1260,16 +1287,12 @@ async function handleOtpVerificationSubmit(e) {
       state.user = data.user;
       localStorage.setItem('smspulse_userId', data.user.id);
       closeOtpModal();
-      closeRegisterModal();
-      closeLoginModal();
-      closeGoogleChooserModal();
       renderHeaderUser();
       fetchMyOrders();
       showToast(`🎉 Welcome ${data.user.name}! Your account is active!`, 'success');
-      // Remove ?action= from URL so register modal never reopens
-      if (window.location.search.includes('action=')) {
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
     } else {
       showToast(data.error || 'Invalid verification code', 'error');
     }
@@ -1905,7 +1928,7 @@ async function executeSmartBuy(serviceId, startingPrice, btnElem) {
 }
 
 
-// modal-backdrop click listener to close on outside click
+// modal-backdrop click listener to close modal on outside click
 document.addEventListener('click', (e) => {
   if (e.target && e.target.classList && e.target.classList.contains('modal-backdrop')) {
     e.target.classList.remove('open');
