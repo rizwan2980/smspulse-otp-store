@@ -6,7 +6,7 @@
   <title>SMSPulse — Global Virtual Numbers & Instant SMS Verification</title>
   <meta name="description" content="Get instant virtual phone numbers for online SMS verification. Bypass OTP on WhatsApp, Telegram, Google, OpenAI ChatGPT, TikTok, Amazon, and 1,100+ services.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230284c7%22/><path d=%22M25 50h12l8-18 10 36 8-18h12%22 fill=%22none%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
-  <link rel="stylesheet" href="/css/style.css?v=4.6">
+  <link rel="stylesheet" href="/css/style.css?v=4.7">
   <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -31,7 +31,7 @@
         <a href="/" class="nav-link active">Store</a>
         <a href="/payment" class="nav-link">Recharge Wallet <span class="badge-nav">Top Up</span></a>
         <a href="/faq" class="nav-link">FAQ & Help</a>
-        <a href="/docs" class="nav-link">Developer API</a>
+        
         <a href="/admin" class="nav-link" id="nav-admin-link" style="display:none; color:var(--brand-amber); font-weight:700;">⚙️ Admin</a>
       </nav>
 
@@ -49,7 +49,7 @@
       <div class="sub-nav-links">
         <a href="/" class="sub-nav-item active">⚡ Buy Number</a>
         <a href="/payment" class="sub-nav-item">💳 Binance USDT / Crypto & Bank</a>
-        <a href="/docs" class="sub-nav-item">🔌 API Integration</a>
+        
         <a href="/faq" class="sub-nav-item">❓ User Guide</a>
       </div>
       <div style="display:flex; align-items:center; gap:12px;">
@@ -115,7 +115,7 @@
               </div>
             </div>
 
-            <div class="fivesim-picker-drawer" id="service-picker-drawer" style="display: none;">
+            <div class="fivesim-picker-drawer" id="service-picker-drawer" style="display: block;">
               <input type="text" id="service-search-input" class="fivesim-search-box" placeholder="Search service (WhatsApp, Google, Telegram...)" oninput="filterServices(this.value)">
               <div class="fivesim-items-grid" id="services-grid-list"></div>
             </div>
@@ -371,7 +371,7 @@
           <li><a href="/">Home Store</a></li>
           <li><a href="/payment">Top Up / Add Funds</a></li>
           <li><a href="/faq">Frequently Asked Questions</a></li>
-          <li><a href="/docs">Developer API Documentation</a></li>
+          
         </ul>
       </div>
 
@@ -632,7 +632,7 @@
     </div>
   </div>
 
-  <script src="/js/app.js?v=4.6"></script>
+  <script src="/js/app.js?v=4.7"></script>
 
   <!-- Mobile Floating App Navigation Bar (Dedicated Mobile Mode) -->
   <nav class="mobile-bottom-nav">

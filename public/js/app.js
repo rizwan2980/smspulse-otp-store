@@ -1462,6 +1462,8 @@ function init5SimUI() {
 
   render5simServicePill();
   render5simCountryPill();
+  renderServicesGrid('');
+  renderCountriesGrid('');
   update5simOperators();
 }
 
@@ -1515,8 +1517,11 @@ function renderServicesGrid(query = '') {
     const isSelected = state.selectedService && state.selectedService.id === s.id;
     return `
       <div class="fivesim-grid-item ${isSelected ? 'active' : ''}" onclick="select5simService('${s.id}')">
-        <span style="font-size: 1.15rem;">${getServiceIcon(s.id)}</span>
-        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${s.name}</span>
+        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+          <span style="font-size: 1.25rem; flex-shrink: 0;">${getServiceIcon(s.id)}</span>
+          <span style="font-size: 0.88rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${s.name}</span>
+        </div>
+        ${isSelected ? '<span style="color: #1877f2; font-weight: 800; font-size: 0.95rem;">✓</span>' : '<span style="font-size: 0.74rem; color: var(--text-muted);">Select ›</span>'}
       </div>
     `;
   }).join('');
@@ -1524,8 +1529,8 @@ function renderServicesGrid(query = '') {
 
 function select5simService(id) {
   state.selectedService = state.services.find(s => s.id === id);
-  toggleServicePicker(true);
   render5simServicePill();
+  renderServicesGrid(document.getElementById('service-search-input')?.value || '');
   update5simOperators();
 }
 
@@ -1561,8 +1566,11 @@ function renderCountriesGrid(query = '') {
     const isSelected = state.selectedCountry && state.selectedCountry.id === c.id;
     return `
       <div class="fivesim-grid-item ${isSelected ? 'active' : ''}" onclick="select5simCountry('${c.id}')">
-        <span style="font-size: 1.15rem;">${c.flag}</span>
-        <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.name}</span>
+        <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+          <span style="font-size: 1.25rem; flex-shrink: 0;">${c.flag}</span>
+          <span style="font-size: 0.88rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${c.name}</span>
+        </div>
+        ${isSelected ? '<span style="color: #1877f2; font-weight: 800; font-size: 0.95rem;">✓</span>' : '<span style="font-size: 0.74rem; color: var(--text-muted);">Select ›</span>'}
       </div>
     `;
   }).join('');

@@ -34,7 +34,7 @@ app.get('/faq', (req, res) => {
 });
 
 app.get('/docs', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/docs.html'));
+  res.redirect('/');
 });
 
 // Fallback to index.html
