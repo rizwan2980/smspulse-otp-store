@@ -6,7 +6,7 @@
   <title>SMSPulse — Global Virtual Numbers & Instant SMS Verification</title>
   <meta name="description" content="Get instant virtual phone numbers for online SMS verification. Bypass OTP on WhatsApp, Telegram, Google, OpenAI ChatGPT, TikTok, Amazon, and 1,100+ services.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230284c7%22/><path d=%22M25 50h12l8-18 10 36 8-18h12%22 fill=%22none%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
-  <link rel="stylesheet" href="/css/style.css?v=3.0">
+  <link rel="stylesheet" href="/css/style.css?v=3.1">
   <!-- Google Identity Services SDK -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -420,14 +420,30 @@
         <p style="font-size:0.85rem; color:var(--text-muted);">to continue to <strong style="color:var(--primary);">SMSPulse</strong></p>
       </div>
 
+      <!-- Quick 1-Tap Account Selector -->
+      <div style="margin-bottom:1.25rem;">
+        <button type="button" onclick="quickGoogleSignIn('rizwansaeed2980@gmail.com', 'Rizwan Saeed')" style="width:100%; display:flex; align-items:center; gap:12px; padding:10px 14px; background:rgba(2, 132, 199, 0.08); border:1.5px solid var(--primary); border-radius:14px; cursor:pointer; text-align:left; transition:all 0.2s;">
+          <img src="https://api.dicebear.com/7.x/initials/svg?seed=Rizwan+Saeed" style="width:36px; height:36px; border-radius:50%; flex-shrink:0;">
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; font-size:0.9rem; color:var(--text-main);">Rizwan Saeed <span style="font-size:0.7rem; background:#0284c7; color:#fff; padding:1px 6px; border-radius:6px; margin-left:4px;">Admin</span></div>
+            <div style="font-size:0.75rem; color:var(--text-muted); text-overflow:ellipsis; overflow:hidden;">rizwansaeed2980@gmail.com</div>
+          </div>
+          <span style="font-size:0.85rem; font-weight:700; color:var(--primary); background:rgba(2,132,199,0.15); padding:4px 8px; border-radius:8px;">1-Tap Login →</span>
+        </button>
+      </div>
+
+      <div class="auth-divider" style="margin: 1.25rem 0 1rem 0;">
+        <span>or enter any Google / Gmail account</span>
+      </div>
+
       <form onsubmit="handleGoogleSubmit(event)" style="text-align:left;">
         <div class="form-group" style="margin-bottom:1.25rem;">
           <label class="form-label" style="font-size:0.85rem; font-weight:700; color:var(--text-main); margin-bottom:8px; display:block;">Enter your Gmail address</label>
           <input type="email" id="google-input-email" class="form-input" placeholder="e.g. yourname@gmail.com" style="height:48px; font-size:0.95rem; border-radius:12px;" required autofocus>
-          <span style="font-size:0.75rem; color:var(--text-muted); margin-top:5px; display:block;">Use your personal or business Google account to continue</span>
+          <span style="font-size:0.75rem; color:var(--text-muted); margin-top:5px; display:block;">Instant sign-in without password</span>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width:100%; height:48px; font-size:0.95rem; font-weight:700; border-radius:var(--radius-full);">
+        <button type="submit" id="btn-google-submit" class="btn btn-primary" style="width:100%; height:48px; font-size:0.95rem; font-weight:700; border-radius:var(--radius-full);">
           Continue with Google →
         </button>
       </form>
@@ -633,6 +649,6 @@
     </div>
   </div>
 
-  <script src="/js/app.js?v=3.0"></script>
+  <script src="/js/app.js?v=3.1"></script>
 </body>
 </html>

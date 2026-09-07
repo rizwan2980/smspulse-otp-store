@@ -168,5 +168,16 @@
     "balanceUsd": 0,
     "balancePkr": 0,
     "createdAt": "2026-09-06T17:56:05.051Z"
+  },
+  {
+    "id": "usr_1788786438749_r084a",
+    "name": "Test User",
+    "email": "testuser_1788786438564@gmail.com",
+    "password": "password123",
+    "authProvider": "email",
+    "role": "user",
+    "balanceUsd": 0,
+    "balancePkr": 0,
+    "createdAt": "2026-09-07T13:07:18.749Z"
   }
 ]

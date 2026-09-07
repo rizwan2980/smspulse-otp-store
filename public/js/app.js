@@ -853,7 +853,11 @@ function startPolling() {
 // Auth Modals
 function openLoginModal() {
   const modal = document.getElementById('login-modal');
-  if (modal) modal.classList.add('open');
+  if (modal) {
+    modal.classList.add('open');
+  } else {
+    window.location.href = '/?action=login';
+  }
 }
 
 function closeLoginModal() {
@@ -863,7 +867,11 @@ function closeLoginModal() {
 
 function openRegisterModal() {
   const modal = document.getElementById('register-modal');
-  if (modal) modal.classList.add('open');
+  if (modal) {
+    modal.classList.add('open');
+  } else {
+    window.location.href = '/?action=register';
+  }
 }
 
 function closeRegisterModal() {
@@ -899,9 +907,24 @@ function logout() {
 
 // Handle login submit
 async function handleLoginSubmit(e) {
-  e.preventDefault();
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
+  if (e) e.preventDefault();
+  const emailInput = document.getElementById('login-email');
+  const pwInput = document.getElementById('login-password');
+  const submitBtn = e?.target?.querySelector('button[type="submit"]') || document.querySelector('#login-modal button[type="submit"]');
+
+  const email = emailInput ? emailInput.value.trim() : '';
+  const password = pwInput ? pwInput.value : '';
+
+  if (!email || !password) {
+    showToast('Please enter both email and password', 'error');
+    return;
+  }
+
+  const origText = submitBtn ? submitBtn.innerHTML : 'Sign In';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Signing in... ⏳';
+  }
 
   try {
     const res = await fetch('/api/auth/login', {
@@ -917,11 +940,20 @@ async function handleLoginSubmit(e) {
       renderHeaderUser();
       fetchMyOrders();
       showToast(`Welcome back, ${data.user.name}!`, 'success');
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
     } else {
-      showToast(data.error || 'Login failed', 'error');
+      showToast(data.error || 'Invalid email or password', 'error');
     }
   } catch (err) {
+    console.error('Login error:', err);
     showToast('Network error during login', 'error');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = origText;
+    }
   }
 }
 
@@ -929,10 +961,11 @@ async function handleLoginSubmit(e) {
 let pendingRegistrationEmail = '';
 
 async function handleRegisterSubmit(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   const nameInput = document.getElementById("reg-name");
   const emailInput = document.getElementById("reg-email");
   const pwInput = document.getElementById("reg-password");
+  const submitBtn = e?.target?.querySelector('button[type="submit"]') || document.querySelector('#register-modal button[type="submit"]');
 
   const name = nameInput ? nameInput.value.trim() : "";
   const email = emailInput ? emailInput.value.trim() : "";
@@ -943,13 +976,22 @@ async function handleRegisterSubmit(e) {
     return;
   }
 
-  showToast("Creating your permanent account...", "info");
+  if (password.length < 6) {
+    showToast("Password must be at least 6 characters", "error");
+    return;
+  }
+
+  const origText = submitBtn ? submitBtn.innerHTML : 'Create Account';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Creating Account... ⏳';
+  }
 
   try {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password })
+      body: JSON.stringify({ name: name || email.split('@')[0], email, password })
     });
     const data = await res.json();
     if (data.success) {
@@ -958,12 +1000,21 @@ async function handleRegisterSubmit(e) {
       closeRegisterModal();
       renderHeaderUser();
       fetchMyOrders();
-      showToast("Welcome " + data.user.name + "! Your account has been created successfully!", "success");
+      showToast(`🎉 Welcome ${data.user.name}! Your account has been created successfully!`, "success");
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
     } else {
       showToast(data.error || "Registration failed", "error");
     }
   } catch (err) {
+    console.error('Registration error:', err);
     showToast("Network error during registration", "error");
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = origText;
+    }
   }
 }
 
@@ -1000,6 +1051,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (buyBtn) {
     buyBtn.addEventListener('click', buySelectedNumber);
   }
+
+  // Handle URL action params (e.g. ?action=login or ?action=register)
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    if (action === 'login') setTimeout(openLoginModal, 200);
+    else if (action === 'register') setTimeout(openRegisterModal, 200);
+    else if (action === 'google') setTimeout(handleGoogleSignIn, 200);
+  } catch (e) {}
 });
 
 
@@ -1081,18 +1141,65 @@ function closeGoogleChooserModal() {
   if (modal) modal.classList.remove('open');
 }
 
+async function quickGoogleSignIn(email, name) {
+  const avatar = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(name || email.split('@')[0]);
+  closeGoogleChooserModal();
+  await executeGoogleAuth(email.toLowerCase(), name, avatar, 'gid_' + Date.now());
+}
+
 async function handleGoogleSubmit(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   const input = document.getElementById('google-input-email');
-  if (!input || !input.value.trim()) return;
+  const btn = document.getElementById('btn-google-submit') || e?.target?.querySelector('button[type="submit"]');
+  if (!input || !input.value.trim()) {
+    showToast('Please enter your Gmail address', 'error');
+    return;
+  }
 
   const email = input.value.trim().toLowerCase();
   const name = email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   const avatar = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(name);
 
-  closeGoogleChooserModal();
-  showToast(`Signing in with ${email}...`, 'info');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = 'Connecting to Google... ⏳';
+  }
+
   await executeGoogleAuth(email, name, avatar, 'gid_' + Date.now());
+}
+
+async function executeGoogleAuth(email, name, avatar, googleId) {
+  try {
+    showToast(`Connecting Google account: ${email}...`, 'info');
+    const res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name, avatar, googleId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      state.user = data.user;
+      localStorage.setItem('smspulse_userId', data.user.id);
+      closeGoogleChooserModal();
+      closeLoginModal();
+      closeRegisterModal();
+      renderHeaderUser();
+      fetchMyOrders();
+      if (data.isNew) {
+        showToast(`🎉 Welcome ${data.user.name}! Google account created!`, 'success');
+      } else {
+        showToast(`Welcome back, ${data.user.name}!`, 'success');
+      }
+      setTimeout(() => {
+        window.location.reload();
+      }, 600);
+    } else {
+      showToast(data.error || 'Google Sign-In failed', 'error');
+    }
+  } catch (err) {
+    console.error('Google Sign-In error:', err);
+    showToast('Network error during Google Sign-In', 'error');
+  }
 }
 
 // Forgot Password Modal Controls
