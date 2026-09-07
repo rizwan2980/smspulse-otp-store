@@ -1250,14 +1250,7 @@ function openOtpModal(email, devCode = null, targetType = 'auth') {
     setTimeout(() => input.focus(), 200);
   }
 
-  const banner = document.getElementById('otp-security-banner');
-  const codeEl = document.getElementById('otp-security-code');
-  if (devCode && banner && codeEl) {
-    codeEl.textContent = devCode;
-    banner.style.display = 'block';
-  } else if (banner) {
-    banner.style.display = 'none';
-  }
+  
 
   modal.classList.add('open');
 }

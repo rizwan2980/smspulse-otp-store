@@ -50,7 +50,7 @@ router.post('/register', async (req, res) => {
     success: true,
     requireOtp: true,
     email: userEmail,
-    devCode: mailResult && mailResult.success ? null : pin,
+    
     message: `A 6-digit verification code has been issued for ${userEmail}.`
   });
 });
@@ -88,7 +88,7 @@ router.post('/login', async (req, res) => {
     success: true,
     requireOtp: true,
     email: userEmail,
-    devCode: mailResult && mailResult.success ? null : pin,
+    
     message: `A 6-digit security code has been issued for ${userEmail}.`
   });
 });
@@ -119,7 +119,7 @@ router.post('/google', async (req, res) => {
     success: true,
     requireOtp: true,
     email: userEmail,
-    devCode: mailResult && mailResult.success ? null : pin,
+    
     message: `A 6-digit verification code has been issued for ${userEmail}.`
   });
 });
@@ -235,7 +235,7 @@ router.post('/resend-code', async (req, res) => {
 
   res.json({
     success: true,
-    devCode: mailResult && mailResult.success ? null : newPin,
+    
     message: `A new 6-digit verification code has been issued for ${userEmail}.`
   });
 });
