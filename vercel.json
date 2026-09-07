@@ -1,12 +1,15 @@
 {
   "version": 2,
-  "cleanUrls": true,
   "functions": {
     "api/index.js": {
       "includeFiles": "server/**"
     }
   },
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
     {
       "source": "/payment",
       "destination": "/payment.html"
@@ -22,10 +25,6 @@
     {
       "source": "/docs",
       "destination": "/docs.html"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
     }
   ]
 }
