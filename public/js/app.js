@@ -161,6 +161,10 @@ async function initUser() {
 
 // Render header wallet & actions
 function renderHeaderUser() {
+  const adminNav = document.getElementById('nav-admin-link');
+  if (adminNav) {
+    adminNav.style.display = (state.user && state.user.role === 'admin') ? 'inline-block' : 'none';
+  }
   const container = document.getElementById('header-user-area');
   if (!container) return;
 

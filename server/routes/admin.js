@@ -9,7 +9,7 @@ function checkAdmin(req, res, next) {
   const users = readData('users');
   const user = users.find(u => u.id === userId);
 
-  if (role === 'admin' || (user && user.role === 'admin') || userId === 'usr_default_admin') {
+  if (role === 'admin' || (user && user.role === 'admin')) {
     return next();
   }
   return res.status(403).json({ error: 'Access denied. Admin rights required.' });

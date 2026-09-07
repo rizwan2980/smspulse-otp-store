@@ -133,7 +133,8 @@
     "role": "admin",
     "balanceUsd": 2,
     "balancePkr": 560,
-    "createdAt": "2026-09-06T12:16:08.429Z"
+    "createdAt": "2026-09-06T12:16:08.429Z",
+    "password": "admin"
   },
   {
     "id": "usr_1788699966501_9825i",
