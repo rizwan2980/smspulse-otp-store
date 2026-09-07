@@ -853,7 +853,7 @@ function startPolling() {
 
 // Auth Modals
 function openLoginModal() {
-  if (state.user) { openProfileModal(); return; }
+  if (state.user || localStorage.getItem('smspulse_userId')) { openProfileModal(); return; }
   const modal = document.getElementById('login-modal');
   if (modal) {
     modal.classList.add('open');
@@ -868,7 +868,7 @@ function closeLoginModal() {
 }
 
 function openRegisterModal() {
-  if (state.user) { openProfileModal(); return; }
+  if (state.user || localStorage.getItem('smspulse_userId')) { openProfileModal(); return; }
   const modal = document.getElementById('register-modal');
   if (modal) {
     modal.classList.add('open');
@@ -926,7 +926,7 @@ async function handleLoginSubmit(e) {
   const origText = submitBtn ? submitBtn.innerHTML : 'Sign In';
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = 'Verifying... ⏳';
+    submitBtn.innerHTML = 'Signing in... ⏳';
   }
 
   try {
@@ -936,18 +936,14 @@ async function handleLoginSubmit(e) {
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
-    if (data.requireOtp) {
-      state.pendingAuth = { email: data.email, type: 'login' };
-      closeLoginModal();
-      openOtpModal(data.email, data.devCode, 'login');
-      showToast(data.message || 'Security code issued. Please enter code to continue.', 'info');
-    } else if (data.success) {
+    if (data.success) {
       state.user = data.user;
       localStorage.setItem('smspulse_userId', data.user.id);
       closeLoginModal();
+      window.history.replaceState({}, document.title, window.location.pathname);
       renderHeaderUser();
       fetchMyOrders();
-      showToast(`Welcome back, ${data.user.name}!`, 'success');
+      showToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
       setTimeout(() => window.location.reload(), 600);
     } else {
       showToast(data.error || 'Invalid email or password', 'error');
@@ -987,7 +983,7 @@ async function handleRegisterSubmit(e) {
   const origText = submitBtn ? submitBtn.innerHTML : 'Create Account';
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = 'Sending Code... ⏳';
+    submitBtn.innerHTML = 'Creating Account... ⏳';
   }
 
   try {
@@ -997,18 +993,14 @@ async function handleRegisterSubmit(e) {
       body: JSON.stringify({ name: name || email.split('@')[0], email, password })
     });
     const data = await res.json();
-    if (data.requireOtp) {
-      state.pendingAuth = { email: data.email, type: 'register' };
-      closeRegisterModal();
-      openOtpModal(data.email, data.devCode, 'register');
-      showToast('Verification code issued. Please enter code to activate account.', 'info');
-    } else if (data.success) {
+    if (data.success) {
       state.user = data.user;
       localStorage.setItem("smspulse_userId", data.user.id);
       closeRegisterModal();
+      window.history.replaceState({}, document.title, window.location.pathname);
       renderHeaderUser();
       fetchMyOrders();
-      showToast(`🎉 Welcome ${data.user.name}! Your account has been created!`, "success");
+      showToast(data.message || `🎉 Welcome ${data.user.name}! Your account is active!`, "success");
       setTimeout(() => window.location.reload(), 600);
     } else {
       showToast(data.error || "Registration failed", "error");
@@ -1062,9 +1054,16 @@ document.addEventListener('DOMContentLoaded', () => {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action');
-    if (action === 'login') setTimeout(openLoginModal, 200);
-    else if (action === 'register') setTimeout(openRegisterModal, 200);
-    else if (action === 'google') setTimeout(handleGoogleSignIn, 200);
+    const hasUser = Boolean(state.user || localStorage.getItem('smspulse_userId'));
+    if (hasUser) {
+      if (action) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } else {
+      if (action === 'login') setTimeout(openLoginModal, 200);
+      else if (action === 'register') setTimeout(openRegisterModal, 200);
+      else if (action === 'google') setTimeout(handleGoogleSignIn, 200);
+    }
   } catch (e) {}
 });
 
@@ -1123,7 +1122,7 @@ function checkPasswordStrength(pw) {
 
 // Google Sign-In Modal Controls
 function handleGoogleSignIn(source = 'login') {
-  if (state.user) { openProfileModal(); return; }
+  if (state.user || localStorage.getItem('smspulse_userId')) { openProfileModal(); return; }
   closeLoginModal();
   closeRegisterModal();
   const modal = document.getElementById('google-chooser-modal');
@@ -1157,7 +1156,7 @@ async function handleGoogleSubmit(e) {
 
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = 'Sending Code... ⏳';
+    btn.innerHTML = 'Signing in... ⏳';
   }
 
   try {
@@ -1167,18 +1166,14 @@ async function handleGoogleSubmit(e) {
       body: JSON.stringify({ email, name, avatar, googleId: 'gid_' + Date.now() })
     });
     const data = await res.json();
-    if (data.requireOtp) {
-      state.pendingAuth = { email: data.email, type: 'google' };
-      closeGoogleChooserModal();
-      openOtpModal(data.email, data.devCode, 'google');
-      showToast('Verification code issued. Please enter code to sign in.', 'info');
-    } else if (data.success) {
+    if (data.success) {
       state.user = data.user;
       localStorage.setItem('smspulse_userId', data.user.id);
       closeGoogleChooserModal();
+      window.history.replaceState({}, document.title, window.location.pathname);
       renderHeaderUser();
       fetchMyOrders();
-      showToast(`Welcome back, ${data.user.name}!`, 'success');
+      showToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
       setTimeout(() => window.location.reload(), 600);
     } else {
       showToast(data.error || 'Google Sign-In failed', 'error');
@@ -1189,7 +1184,7 @@ async function handleGoogleSubmit(e) {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = 'Send Verification Code →';
+      btn.innerHTML = 'Continue with Google →';
     }
   }
 }
