@@ -1954,3 +1954,24 @@ document.addEventListener('click', (e) => {
     e.target.classList.remove('open');
   }
 });
+
+function openTutorialVideoModal() {
+  const modal = document.getElementById('tutorial-video-modal');
+  if (modal) {
+    modal.classList.add('active');
+    const player = document.getElementById('tutorial-video-player');
+    if (player) {
+      player.currentTime = 0;
+      player.play().catch(() => {});
+    }
+  }
+}
+
+function closeTutorialVideoModal() {
+  const modal = document.getElementById('tutorial-video-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    const player = document.getElementById('tutorial-video-player');
+    if (player) player.pause();
+  }
+}
