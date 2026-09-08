@@ -1,103 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Developer API Documentation — SMSPulse</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2245%22 fill=%22%230284c7%22/><path d=%22M25 50h12l8-18 10 36 8-18h12%22 fill=%22none%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
-  <link rel="stylesheet" href="/css/style.css?v=4.6">
+  <meta http-equiv="refresh" content="0; url=/">
+  <title>Redirecting...</title>
+  <script>window.location.replace('/');</script>
 </head>
-<body>
-  <header class="site-header">
-    <div class="header-top">
-      <div class="header-brand" onclick="window.location.href='/'">
-        <div class="brand-pulse-logo">
-          <svg viewBox="0 0 24 24">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-          </svg>
-        </div>
-        <div class="brand-title-group">
-          <h1 class="site-brand-name">SMSPulse</h1>
-          <span>Virtual Numbers & OTP Service</span>
-        </div>
-      </div>
-      <nav class="header-nav">
-        <a href="/" class="nav-link">Home</a>
-        <a href="/payment" class="nav-link">Top Up / Payment</a>
-        <a href="/faq" class="nav-link">FAQ</a>
-        <a href="/docs" class="nav-link active">API Docs</a>
-        <a href="/admin" class="nav-link" id="nav-admin-link" style="display:none; color:var(--brand-amber); font-weight:700;">⚙️ Admin</a>
-      </nav>
-      <div class="header-actions">
-        <button class="btn btn-icon btn-ghost btn-toggle-theme" onclick="toggleTheme()">🌙</button>
-        <div id="header-user-area"></div>
-      </div>
-    </div>
-  </header>
-
-  <div style="max-width: 900px; margin: 3rem auto; padding: 0 1.5rem; flex: 1;">
-    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem;">SMSPulse Reseller API Documentation</h1>
-    <p style="color: var(--text-muted); margin-bottom: 2rem;">Integrate our virtual number and SMS receiving services into your automated bots and applications.</p>
-
-    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-      <div style="background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">1. Buy Virtual Number</h3>
-        <code style="display:block; background:var(--bg-card-alt); padding:10px 14px; border-radius:var(--radius-sm); font-family:monospace; margin-bottom:10px;">
-          POST /api/orders/buy
-        </code>
-        <pre style="background:var(--bg-card-alt); padding:12px; border-radius:var(--radius-sm); font-size:0.85rem; overflow-x:auto;">
-{
-  "serviceId": "whatsapp",
-  "countryId": "england",
-  "operator": "any"
-}</pre>
-      </div>
-
-      <div style="background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">2. Check Order & Receive SMS Code</h3>
-        <code style="display:block; background:var(--bg-card-alt); padding:10px 14px; border-radius:var(--radius-sm); font-family:monospace; margin-bottom:10px;">
-          GET /api/orders/:orderId
-        </code>
-        <p style="color: var(--text-muted); font-size: 0.88rem;">Poll every 3 seconds until status is <code>RECEIVED</code> and <code>smsList</code> contains the verification code.</p>
-      </div>
-
-      <div style="background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">3. Cancel Order (Instant Auto-Refund)</h3>
-        <code style="display:block; background:var(--bg-card-alt); padding:10px 14px; border-radius:var(--radius-sm); font-family:monospace;">
-          POST /api/orders/:orderId/cancel
-        </code>
-      </div>
-    </div>
-  </div>
-
-  <footer class="site-footer">
-    <div class="footer-bottom">
-      <p>SMSPulse Developer API Documentation © 2016-2026.</p>
-      <a href="/" style="color: var(--primary);">← Back to Home</a>
-    </div>
-  </footer>
-
-  <script src="/js/app.js?v=4.6"></script>
-
-  <!-- Mobile Floating App Navigation Bar (Dedicated Mobile Mode) -->
-  <nav class="mobile-bottom-nav">
-    <a href="/" class="mobile-nav-btn">
-      <span class="icon">⚡</span>
-      <span>Store</span>
-    </a>
-    <a href="javascript:void(0)" onclick="switchMainTab('active'); window.scrollTo({top: document.querySelector('.main-content')?.offsetTop - 70, behavior: 'smooth'});" class="mobile-nav-btn">
-      <span class="icon">📬</span>
-      <span>My OTPs</span>
-    </a>
-    <a href="/payment" class="mobile-nav-btn">
-      <span class="icon">💳</span>
-      <span>Top Up</span>
-    </a>
-    <a href="javascript:void(0)" onclick="if(state.user) openProfileModal(); else openLoginModal();" class="mobile-nav-btn">
-      <span class="icon">👤</span>
-      <span>Account</span>
-    </a>
-  </nav>
-
+<body style="background:#0f172a; color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;">
+  <p>Redirecting to store...</p>
 </body>
 </html>

@@ -24,7 +24,7 @@
     },
     {
       "source": "/docs",
-      "destination": "/docs.html"
+      "destination": "/"
     }
   ]
 }
